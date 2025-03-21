@@ -1,0 +1,21 @@
+.wp-block-techplay-reference-links {
+    .reference-link-item {
+        margin-bottom: 24px;
+        padding: 16px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background-color: #f9f9f9;
+
+        .components-base-control {
+            margin-bottom: 16px;
+        }
+
+        .components-base-control:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    .link-icon {
+        margin-right: 8px;
+    }
+} 

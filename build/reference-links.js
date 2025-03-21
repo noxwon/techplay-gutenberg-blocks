@@ -1,0 +1,1 @@
+jQuery(document).ready((function(e){e(".reference-link-item").hover((function(){e(this).addClass("hover")}),(function(){e(this).removeClass("hover")})),e(".reference-link-item a").on("click",(function(n){n.preventDefault(),window.open(e(this).attr("href"),"_blank")}))}));

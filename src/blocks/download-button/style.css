@@ -1,0 +1,131 @@
+.wp-block-techplay-download-button {
+    margin: 1.5em 0;
+    display: flex;
+}
+
+.wp-block-techplay-download-button[style*="justify-content: flex-start"] {
+    justify-content: flex-start;
+}
+
+.wp-block-techplay-download-button[style*="justify-content: center"] {
+    justify-content: center;
+}
+
+.wp-block-techplay-download-button[style*="justify-content: flex-end"] {
+    justify-content: flex-end;
+}
+
+.download-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 24px;
+    background-color: var(--button-bg-color, #007bff);
+    color: var(--button-text-color, #ffffff);
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.download-button:hover {
+    background-color: var(--button-hover-bg-color, #0056b3);
+    color: var(--button-hover-text-color, #ffffff);
+}
+
+.download-button .button-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+}
+
+.download-button .button-icon::before {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.download-button[data-icon="download"] .button-icon::before {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffffff"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>');
+}
+
+.download-button[data-icon="document"] .button-icon::before {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffffff"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>');
+}
+
+.download-button[data-icon="file"] .button-icon::before {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffffff"><path d="M13 9V3.5L18.5 9M6 2c-1.11 0-2 .89-2 2v16c0 1.11.89 2 2 2h12c1.11 0 2-.89 2-2V8l-6-6H6z"/></svg>');
+}
+
+.download-button[data-icon="pdf"] .button-icon::before {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffffff"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z"/></svg>');
+}
+
+.download-button[data-icon="archive"] .button-icon::before {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ffffff"><path d="M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5z"/></svg>');
+}
+
+/* 스타일 변형 */
+.style-round .download-button {
+    border-radius: 50px;
+}
+
+.style-accent .download-button {
+    background-color: #ff4757;
+}
+
+.style-accent .download-button:hover {
+    background-color: #ff6b81;
+}
+
+/* 크기 변형 */
+.size-xs .download-button {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.size-sm .download-button {
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+.size-default .download-button {
+    padding: 12px 24px;
+    font-size: 16px;
+}
+
+.size-lg .download-button {
+    padding: 16px 32px;
+    font-size: 18px;
+}
+
+.size-xlg .download-button {
+    padding: 20px 40px;
+    font-size: 20px;
+}
+
+/* 다크모드 */
+[data-scheme="dark"] .download-button {
+    background-color: var(--button-bg-color, #0056b3);
+}
+
+[data-scheme="dark"] .download-button:hover {
+    background-color: var(--button-hover-bg-color, #003d80);
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .download-button {
+        width: 100%;
+        justify-content: center;
+    }
+} 

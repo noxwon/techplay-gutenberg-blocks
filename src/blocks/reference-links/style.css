@@ -1,0 +1,313 @@
+.wp-block-techplay-reference-links {
+    margin: 1.5em 0;
+    padding: 1.5em;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.reference-link-item {
+    margin-bottom: 1em;
+}
+
+.reference-link-item:last-child {
+    margin-bottom: 0;
+}
+
+.reference-link-item a {
+    display: flex;
+    align-items: center;
+    padding: 0.75em;
+    color: #333;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.reference-link-item a:hover {
+    background-color: #e9ecef;
+}
+
+.reference-link-favicon {
+    width: var(--reference-link-icon-size, 1em);
+    height: var(--reference-link-icon-size, 1em);
+    margin-right: 8px;
+    flex-shrink: 0;
+    object-fit: contain;
+}
+
+.reference-link-title {
+    font-size: var(--reference-link-font-size, inherit);
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.reference-link-item a::after {
+    content: '';
+    display: inline-block;
+    width: calc(var(--reference-link-icon-size, 1em) * 0.75);
+    height: calc(var(--reference-link-icon-size, 1em) * 0.75);
+    margin-left: 8px;
+    flex-shrink: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23666'%3E%3Cpath d='M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.reference-link-item a:hover::after {
+    opacity: 1;
+}
+
+.default-icon {
+    display: inline-block;
+    width: var(--reference-link-icon-size, 1em);
+    height: var(--reference-link-icon-size, 1em);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23666'%3E%3Cpath d='M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.wp-block-techplay-reference-links .reference-title {
+    font-size: 1.2em;
+    font-weight: 600;
+    margin-bottom: 1em;
+    color: #2c3338;
+}
+
+.wp-block-techplay-reference-links .reference-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.wp-block-techplay-reference-links .reference-item {
+    margin-bottom: 0.8em;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5em;
+}
+
+.wp-block-techplay-reference-links .reference-item:last-child {
+    margin-bottom: 0;
+}
+
+.wp-block-techplay-reference-links .reference-number {
+    color: #007bff;
+    font-weight: 600;
+    min-width: 1.5em;
+}
+
+.wp-block-techplay-reference-links .reference-content {
+    flex: 1;
+}
+
+.wp-block-techplay-reference-links .reference-title {
+    font-weight: 600;
+    margin-bottom: 0.3em;
+}
+
+.wp-block-techplay-reference-links .reference-description {
+    color: #666;
+    margin-bottom: 0.3em;
+}
+
+.wp-block-techplay-reference-links .reference-link {
+    color: #007bff;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+}
+
+.wp-block-techplay-reference-links .reference-link:hover {
+    text-decoration: underline;
+}
+
+.wp-block-techplay-reference-links .reference-link::after {
+    content: "↗";
+    font-size: 0.8em;
+}
+
+/* 폰트 크기 스타일 */
+.wp-block-techplay-reference-links.size-xs {
+    font-size: 0.75em !important;
+}
+
+.wp-block-techplay-reference-links.size-sm {
+    font-size: 0.875em !important;
+}
+
+.wp-block-techplay-reference-links.size-default {
+    font-size: 1em !important;
+}
+
+.wp-block-techplay-reference-links.size-lg {
+    font-size: 1.25em !important;
+}
+
+.wp-block-techplay-reference-links.size-xlg {
+    font-size: 1.5em !important;
+}
+
+.reference-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+}
+
+.reference-link:hover {
+    opacity: 0.8;
+}
+
+.link-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.link-icon[data-icon="external"]::before {
+    content: "↗️";
+}
+
+.link-icon[data-icon="link"]::before {
+    content: "🔗";
+}
+
+.link-title {
+    font-weight: 500;
+}
+
+.reference-link-favicon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.reference-link-favicon.default-icon {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.reference-link-favicon.default-icon[data-icon="link"] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23666' viewBox='0 0 24 24'%3E%3Cpath d='M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z'/%3E%3C/svg%3E");
+}
+
+.reference-link-title {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.external-link-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23666666' viewBox='0 0 24 24'%3E%3Cpath d='M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    opacity: 0.6;
+    display: inline-block;
+}
+
+.reference-link:hover .external-link-icon {
+    opacity: 1;
+}
+
+/* 다크모드 */
+[data-scheme="dark"] .reference-link {
+    color: var(--cs-color-primary, #fff);
+}
+
+[data-scheme="dark"] .reference-link:hover {
+    background-color: var(--cs-color-contrast-100, #222);
+}
+
+[data-scheme="dark"] .default-favicon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z'/%3E%3C/svg%3E");
+}
+
+[data-scheme="dark"] .external-link-icon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z'/%3E%3C/svg%3E");
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .reference-link-item a {
+        padding: 10px 12px;
+    }
+}
+
+/* 에디터 화면에서 파비콘 숨기기 */
+.wp-block-techplay-reference-links .reference-link-favicon {
+    display: none;
+}
+
+/* 프론트엔드에서만 파비콘 표시 */
+.wp-block-techplay-reference-links:not(.is-selected) .reference-link-favicon {
+    display: inline-block;
+}
+
+/* 에디터 화면 스타일 */
+.wp-block-techplay-reference-links.is-selected {
+    margin: 2em 0;
+    padding: 2em;
+    background: #f0f0f1;
+}
+
+.reference-links-editor {
+    margin-top: 1.5em;
+}
+
+.reference-links-editor .reference-link-item {
+    margin-bottom: 1.5em;
+    padding: 1em;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.reference-links-editor .reference-link-item:last-child {
+    margin-bottom: 1em;
+}
+
+.reference-links-editor .components-flex {
+    gap: 1em;
+}
+
+.reference-links-editor .components-flex__item {
+    flex: 1;
+}
+
+.reference-links-editor .components-flex__item:last-child {
+    flex: 0 0 auto;
+}
+
+.reference-links-editor .components-base-control {
+    margin-bottom: 1.5em;
+}
+
+.reference-links-editor .components-base-control:last-child {
+    margin-bottom: 0;
+}
+
+.reference-links-editor .components-base-control__label {
+    margin-bottom: 0.5em;
+}
+
+.reference-links-editor .components-text-control__input {
+    width: 100%;
+}
+
+.reference-links-editor .components-button {
+    margin-top: 0;
+} 
