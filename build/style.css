@@ -196,29 +196,30 @@
         height: 30px;
     }
 } 
-.wp-block-techplay-reference-links {
-    margin: 1.5em 0;
+.reference-links {
+    --reference-link-font-size: inherit;
+    --reference-link-icon-size: 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
     padding: 1.5em;
-    background: #f8f9fa;
-    border-radius: 8px;
+    background: #fff;
+    border-radius: 4px;
 }
 
 .reference-link-item {
-    margin-bottom: 1em;
-}
-
-.reference-link-item:last-child {
-    margin-bottom: 0;
+    position: relative;
 }
 
 .reference-link-item a {
     display: flex;
     align-items: center;
-    padding: 0.75em;
-    color: #333;
+    gap: 0.5em;
+    padding: 1em;
+    color: #2c3338;
     text-decoration: none;
     border-radius: 4px;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
 }
 
 .reference-link-item a:hover {
@@ -226,19 +227,35 @@
 }
 
 .reference-link-favicon {
-    width: var(--reference-link-icon-size, 1em);
-    height: var(--reference-link-icon-size, 1em);
-    margin-right: 8px;
+    width: var(--reference-link-icon-size);
+    height: var(--reference-link-icon-size);
     flex-shrink: 0;
-    object-fit: contain;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.reference-link-item a:hover .reference-link-favicon {
+    opacity: 1;
+}
+
+.reference-link-favicon.default-icon::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 width=%2724%27 height=%2724%27%3E%3Cpath fill=%27none%27 d=%27M0 0h24v24H0z%27/%3E%3Cpath d=%27M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6zm11-3v8h-2V6.413l-7.793 7.794-1.414-1.414L17.585 5H13V3h8z%27 fill=%27%23505A64%27/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .reference-link-title {
-    font-size: var(--reference-link-font-size, inherit);
-    flex-grow: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-size: var(--reference-link-font-size);
+    line-height: 1.4;
+    word-break: break-all;
 }
 
 .reference-link-item a::after {
@@ -521,9 +538,38 @@
 
 [data-scheme="dark"] .reference-link-item a:hover {
     background-color: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    color: #ffffff;
 }
 
 [data-scheme="dark"] .reference-link-item a::after {
     background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27%23ffffff%27%3E%3Cpath d=%27M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z%27/%3E%3C/svg%3E");
+}
+
+/* 다크 모드 스타일 */
+.is-dark-theme .reference-links {
+    background: #2c2c2c;
+}
+
+.is-dark-theme .reference-link-item a {
+    color: #f0f0f1;
+}
+
+.is-dark-theme .reference-link-item a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.is-dark-theme .reference-link-favicon.default-icon::before {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 width=%2724%27 height=%2724%27%3E%3Cpath fill=%27none%27 d=%27M0 0h24v24H0z%27/%3E%3Cpath d=%27M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6zm11-3v8h-2V6.413l-7.793 7.794-1.414-1.414L17.585 5H13V3h8z%27 fill=%27%23f0f0f1%27/%3E%3C/svg%3E");
+}
+
+/* 반응형 스타일 */
+@media screen and (max-width: 768px) {
+    .reference-links {
+        padding: 1em;
+    }
+    
+    .reference-link-item a {
+        padding: 0.75em;
+    }
 } 
