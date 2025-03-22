@@ -58,19 +58,25 @@ registerBlockType('techplay-blocks/reference-links', {
                         path: '/techplay-blocks/v1/fetch-site-info',
                         method: 'POST',
                         data: { url: value }
+                    }).catch(error => {
+                        console.error('API 호출 실패:', error);
+                        throw error;
                     });
 
-                    if (response.success) {
+                    if (response && response.success) {
                         newLinks[index] = {
                             ...newLinks[index],
                             title: response.title || value,
                             favicon: response.favicon || ''
                         };
+                    } else {
+                        console.error('API 응답 실패:', response);
                     }
                 } catch (error) {
-                    console.error('Error fetching site info:', error);
+                    console.error('사이트 정보 가져오기 실패:', error);
+                } finally {
+                    setIsLoading(false);
                 }
-                setIsLoading(false);
             }
 
             setAttributes({ links: newLinks });
@@ -83,8 +89,8 @@ registerBlockType('techplay-blocks/reference-links', {
 
         const isValidUrl = (string) => {
             try {
-                new URL(string);
-                return true;
+                const url = new URL(string);
+                return url.protocol === 'http:' || url.protocol === 'https:';
             } catch (_) {
                 return false;
             }

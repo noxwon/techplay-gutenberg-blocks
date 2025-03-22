@@ -116,19 +116,26 @@ class TechPlayGutenbergBlocks {
     }
 
     public function register_rest_routes() {
-        register_rest_route('techplay-blocks/v1', '/download-count', array(
-            'methods' => 'POST',
-            'callback' => array($this, 'update_download_count'),
-            'permission_callback' => function() {
-                return true;
-            }
-        ));
-
         register_rest_route('techplay-blocks/v1', '/fetch-site-info', array(
             'methods' => 'POST',
             'callback' => array($this, 'fetch_site_info'),
             'permission_callback' => function() {
                 return current_user_can('edit_posts');
+            },
+            'args' => array(
+                'url' => array(
+                    'required' => true,
+                    'type' => 'string',
+                    'sanitize_callback' => 'esc_url_raw'
+                )
+            )
+        ));
+
+        register_rest_route('techplay-blocks/v1', '/download-count', array(
+            'methods' => 'POST',
+            'callback' => array($this, 'update_download_count'),
+            'permission_callback' => function() {
+                return true;
             }
         ));
     }
@@ -296,7 +303,8 @@ class TechPlayGutenbergBlocks {
         // 사이트 정보 가져오기
         $response = wp_remote_get($url, array(
             'timeout' => 10,
-            'sslverify' => false
+            'sslverify' => false,
+            'user-agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         ));
 
         if (is_wp_error($response)) {
@@ -305,17 +313,21 @@ class TechPlayGutenbergBlocks {
 
         $body = wp_remote_retrieve_body($response);
         
+        if (empty($body)) {
+            return new WP_Error('empty_response', '사이트로부터 응답을 받지 못했습니다.', array('status' => 500));
+        }
+
         // HTML 파싱
         libxml_use_internal_errors(true);
         $doc = new DOMDocument();
-        @$doc->loadHTML($body);
+        @$doc->loadHTML(mb_convert_encoding($body, 'HTML-ENTITIES', 'UTF-8'));
         libxml_clear_errors();
 
         // 타이틀 가져오기
         $title = '';
         $titleTags = $doc->getElementsByTagName('title');
         if ($titleTags->length > 0) {
-            $title = $titleTags->item(0)->textContent;
+            $title = trim($titleTags->item(0)->textContent);
         }
 
         // 파비콘 가져오기
@@ -323,7 +335,7 @@ class TechPlayGutenbergBlocks {
         $links = $doc->getElementsByTagName('link');
         foreach ($links as $link) {
             $rel = $link->getAttribute('rel');
-            if (strpos($rel, 'icon') !== false) {
+            if (strpos($rel, 'icon') !== false || strpos($rel, 'shortcut icon') !== false) {
                 $favicon = $link->getAttribute('href');
                 break;
             }
@@ -343,9 +355,14 @@ class TechPlayGutenbergBlocks {
             }
         }
 
+        // 파비콘이 없는 경우 기본값 설정
+        if (empty($favicon)) {
+            $favicon = $base_url . '/favicon.ico';
+        }
+
         return array(
             'success' => true,
-            'title' => $title,
+            'title' => $title ?: $url,
             'favicon' => $favicon
         );
     }
@@ -515,25 +532,7 @@ class TechPlayGutenbergBlocks {
         $file_ext = strtolower(pathinfo($file_path, PATHINFO_EXTENSION));
         
         // MIME 타입 설정
-        $mime_types = array(
-            'zip' => 'application/zip',
-            'pdf' => 'application/pdf',
-            'doc' => 'application/msword',
-            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'xls' => 'application/vnd.ms-excel',
-            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'ppt' => 'application/vnd.ms-powerpoint',
-            'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-            'txt' => 'text/plain',
-            'csv' => 'text/csv',
-            'jpg' => 'image/jpeg',
-            'jpeg' => 'image/jpeg',
-            'png' => 'image/png',
-            'gif' => 'image/gif',
-            'html' => 'text/html'
-        );
-        
-        $mime_type = isset($mime_types[$file_ext]) ? $mime_types[$file_ext] : 'application/octet-stream';
+        $mime_type = $this->get_mime_type($file_path);
         
         // 파일 다운로드 헤더 설정
         header('Content-Type: ' . $mime_type);
@@ -550,6 +549,56 @@ class TechPlayGutenbergBlocks {
         
         readfile($file_path);
         exit;
+    }
+
+    private function get_mime_type($file_path) {
+        $file_ext = strtolower(pathinfo($file_path, PATHINFO_EXTENSION));
+        
+        $mime_types = array(
+            // 이미지
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            'svg' => 'image/svg+xml',
+            
+            // 문서
+            'pdf' => 'application/pdf',
+            'doc' => 'application/msword',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'xls' => 'application/vnd.ms-excel',
+            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'ppt' => 'application/vnd.ms-powerpoint',
+            'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            
+            // 텍스트
+            'txt' => 'text/plain',
+            'csv' => 'text/csv',
+            'md' => 'text/markdown',
+            
+            // 압축
+            'zip' => 'application/zip',
+            'rar' => 'application/x-rar-compressed',
+            '7z' => 'application/x-7z-compressed',
+            
+            // 오디오
+            'mp3' => 'audio/mpeg',
+            'wav' => 'audio/wav',
+            'ogg' => 'audio/ogg',
+            
+            // 비디오
+            'mp4' => 'video/mp4',
+            'webm' => 'video/webm',
+            'avi' => 'video/x-msvideo',
+            
+            // 기타
+            'json' => 'application/json',
+            'xml' => 'application/xml'
+        );
+        
+        $mime_type = isset($mime_types[$file_ext]) ? $mime_types[$file_ext] : 'application/octet-stream';
+        return $mime_type;
     }
 }
 
