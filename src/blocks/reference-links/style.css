@@ -330,52 +330,41 @@
 }
 
 /* 다크모드 */
-[data-scheme="dark"] .wp-block-techplay-reference-links {
-    background: #2c2c2c;
-}
-
-[data-scheme="dark"] .reference-link-item a {
-    color: #fff;
-}
-
-[data-scheme="dark"] .reference-link-item a:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-}
-
-[data-scheme="dark"] .reference-link-item a::after {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z'/%3E%3C/svg%3E");
-}
-
-/* 다크 모드 스타일 */
+[data-scheme="dark"] .wp-block-techplay-reference-links,
 .is-dark-theme .reference-links {
     background: #f0f0f1;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+[data-scheme="dark"] .reference-link-item a,
 .is-dark-theme .reference-link-item a {
     color: #2c2c2c;
 }
 
+[data-scheme="dark"] .reference-link-item a:hover,
 .is-dark-theme .reference-link-item a:hover {
     background-color: rgba(0, 0, 0, 0.05);
     color: #000000;
 }
 
+[data-scheme="dark"] .reference-link-favicon.default-icon::before,
 .is-dark-theme .reference-link-favicon.default-icon::before {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='none' d='M0 0h24v24H0z'/%3E%3Cpath d='M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6zm11-3v8h-2V6.413l-7.793 7.794-1.414-1.414L17.585 5H13V3h8z' fill='%232c2c2c'/%3E%3C/svg%3E");
 }
 
+[data-scheme="dark"] .reference-link-item a::after,
 .is-dark-theme .reference-link-item a::after {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c2c2c'%3E%3Cpath d='M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z'/%3E%3C/svg%3E");
 }
 
 /* 에디터 화면 다크 모드 */
+[data-scheme="dark"] .reference-links-editor .reference-link-item,
 .is-dark-theme .reference-links-editor .reference-link-item {
     background: #f0f0f1;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+[data-scheme="dark"] .reference-links-editor .components-text-control__input,
 .is-dark-theme .reference-links-editor .components-text-control__input {
     background: #ffffff;
     color: #2c2c2c;
