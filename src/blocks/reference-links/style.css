@@ -310,4 +310,22 @@
 
 .reference-links-editor .components-button {
     margin-top: 0;
+}
+
+/* 다크모드 */
+[data-scheme="dark"] .wp-block-techplay-reference-links {
+    background: #2c2c2c;
+}
+
+[data-scheme="dark"] .reference-link-item a {
+    color: #fff;
+}
+
+[data-scheme="dark"] .reference-link-item a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+[data-scheme="dark"] .reference-link-item a::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z'/%3E%3C/svg%3E");
 } 

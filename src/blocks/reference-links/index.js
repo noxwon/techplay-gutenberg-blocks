@@ -3,6 +3,7 @@ import { __ } from '@wordpress/i18n';
 import { InspectorControls, RichText, useBlockProps } from '@wordpress/block-editor';
 import { PanelBody, TextControl, Button, SelectControl, ToggleControl } from '@wordpress/components';
 import { useState } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 import './editor.scss';
 
 registerBlockType('techplay-blocks/reference-links', {
@@ -31,6 +32,7 @@ registerBlockType('techplay-blocks/reference-links', {
 
     edit: ({ attributes, setAttributes }) => {
         const { links, showIcon, fontSize, fontSizeUnit } = attributes;
+        const [isLoading, setIsLoading] = useState(false);
         const blockProps = useBlockProps({
             style: {
                 '--reference-link-font-size': fontSize === 'inherit' ? 'inherit' : `${fontSize}${fontSizeUnit}`,
@@ -44,15 +46,48 @@ registerBlockType('techplay-blocks/reference-links', {
             });
         };
 
-        const updateLink = (index, field, value) => {
+        const updateLink = async (index, field, value) => {
             const newLinks = [...links];
             newLinks[index] = { ...newLinks[index], [field]: value };
+
+            // URL이 변경되었고, 유효한 URL인 경우 타이틀과 파비콘을 가져옵니다
+            if (field === 'url' && value && isValidUrl(value)) {
+                setIsLoading(true);
+                try {
+                    const response = await apiFetch({
+                        path: '/techplay-blocks/v1/fetch-site-info',
+                        method: 'POST',
+                        data: { url: value }
+                    });
+
+                    if (response.success) {
+                        newLinks[index] = {
+                            ...newLinks[index],
+                            title: response.title || value,
+                            favicon: response.favicon || ''
+                        };
+                    }
+                } catch (error) {
+                    console.error('Error fetching site info:', error);
+                }
+                setIsLoading(false);
+            }
+
             setAttributes({ links: newLinks });
         };
 
         const removeLink = (index) => {
             const newLinks = links.filter((_, i) => i !== index);
             setAttributes({ links: newLinks });
+        };
+
+        const isValidUrl = (string) => {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
         };
 
         return (
@@ -124,8 +159,9 @@ registerBlockType('techplay-blocks/reference-links', {
                     <Button
                         variant="secondary"
                         onClick={addLink}
+                        disabled={isLoading}
                     >
-                        링크 추가
+                        {isLoading ? '로딩 중...' : '링크 추가'}
                     </Button>
                 </div>
             </div>

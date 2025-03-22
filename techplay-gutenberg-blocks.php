@@ -288,60 +288,66 @@ class TechPlayGutenbergBlocks {
 
     public function fetch_site_info($request) {
         $url = $request->get_param('url');
+        
         if (empty($url)) {
-            return new WP_Error('invalid_url', '유효하지 않은 URL입니다.');
+            return new WP_Error('invalid_url', '유효하지 않은 URL입니다.', array('status' => 400));
         }
-        
-        // URL 정보 캐시 확인
-        $cache_key = 'techplay_site_info_' . md5($url);
-        $cached_data = get_transient($cache_key);
-        
-        if ($cached_data !== false) {
-            return $cached_data;
-        }
-        
+
         // 사이트 정보 가져오기
-        $response = wp_remote_get($url);
+        $response = wp_remote_get($url, array(
+            'timeout' => 10,
+            'sslverify' => false
+        ));
+
         if (is_wp_error($response)) {
-            return $response;
+            return new WP_Error('request_failed', '사이트 정보를 가져오는데 실패했습니다.', array('status' => 500));
         }
+
+        $body = wp_remote_retrieve_body($response);
         
-        $html = wp_remote_retrieve_body($response);
+        // HTML 파싱
         libxml_use_internal_errors(true);
         $doc = new DOMDocument();
-        $doc->loadHTML($html);
-        
-        // 타이틀 추출
+        @$doc->loadHTML($body);
+        libxml_clear_errors();
+
+        // 타이틀 가져오기
         $title = '';
-        $title_tag = $doc->getElementsByTagName('title')->item(0);
-        if ($title_tag) {
-            $title = $title_tag->textContent;
+        $titleTags = $doc->getElementsByTagName('title');
+        if ($titleTags->length > 0) {
+            $title = $titleTags->item(0)->textContent;
         }
-        
-        // 파비콘 URL 추출
+
+        // 파비콘 가져오기
         $favicon = '';
         $links = $doc->getElementsByTagName('link');
         foreach ($links as $link) {
             $rel = $link->getAttribute('rel');
             if (strpos($rel, 'icon') !== false) {
                 $favicon = $link->getAttribute('href');
-                if (strpos($favicon, 'http') !== 0) {
-                    $parsed_url = parse_url($url);
-                    $favicon = $parsed_url['scheme'] . '://' . $parsed_url['host'] . $favicon;
-                }
                 break;
             }
         }
-        
-        $data = array(
+
+        // 상대 경로를 절대 경로로 변환
+        if ($favicon && strpos($favicon, 'http') !== 0) {
+            $parsed_url = parse_url($url);
+            $base_url = $parsed_url['scheme'] . '://' . $parsed_url['host'];
+            
+            if (strpos($favicon, '//') === 0) {
+                $favicon = $parsed_url['scheme'] . ':' . $favicon;
+            } elseif (strpos($favicon, '/') === 0) {
+                $favicon = $base_url . $favicon;
+            } else {
+                $favicon = $base_url . '/' . $favicon;
+            }
+        }
+
+        return array(
+            'success' => true,
             'title' => $title,
             'favicon' => $favicon
         );
-        
-        // 24시간 동안 캐시
-        set_transient($cache_key, $data, 24 * HOUR_IN_SECONDS);
-        
-        return $data;
     }
 
     public function render_admin_page() {
