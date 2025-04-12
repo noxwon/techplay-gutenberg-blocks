@@ -1,6 +1,6 @@
 {
     "name": "techplay-gutenberg-blocks",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "WordPress Gutenberg 커스텀 블록 플러그인",
     "main": "index.js",
     "scripts": {

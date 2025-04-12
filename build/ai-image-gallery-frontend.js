@@ -41,13 +41,26 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
 ;// ./src/blocks/ai-image-gallery/ai-image-gallery-frontend.js
 
 
-// Initialize Masonry and Lightbox
+// Initialize Masonry, Lightbox, and Hover Actions
 external_jQuery_default()(document).ready(function () {
   var galleries = external_jQuery_default()('.wp-block-techplay-gutenberg-blocks-ai-image-gallery');
   galleries.each(function () {
     var $gallery = external_jQuery_default()(this);
     var isMasonry = $gallery.hasClass('has-masonry');
     var hasLightbox = $gallery.hasClass('has-lightbox');
+
+    // Add hover actions container and buttons to each item
+    $gallery.find('.gallery-item').each(function () {
+      var $item = external_jQuery_default()(this);
+      var $img = $item.find('img');
+      var imageUrl = $img.attr('src');
+      // Basic check for valid URL
+      if (imageUrl) {
+        // Ensure SVG icons are used here, replacing any dashicons
+        var hoverActionsHtml = "\n                    <div class=\"image-hover-actions\">\n                        <button class=\"copy-url-button\" title=\"Copy Image URL\">\n                            <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\" width=\"16\" height=\"16\">\n                              <path d=\"M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.871a.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.665l3-3Z\" />\n                              <path d=\"M8.603 17.47a4 4 0 0 1-5.656-5.656l3-3a4 4 0 0 1 5.871.225a.75.75 0 0 1-1.138.977a2.5 2.5 0 0 0-3.665-.142l-3 3a2.5 2.5 0 0 0 3.536 3.536l1.225-1.224a.75.75 0 0 1 1.061 1.06l-1.224 1.224Z\" />\n                            </svg>\n                        </button>\n                        <button class=\"download-image-button\" title=\"Download Image\">\n                           <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\" width=\"16\" height=\"16\">\n                              <path fill-rule=\"evenodd\" d=\"M10 3.75a.75.75 0 0 1 .75.75v6.19l1.97-1.97a.75.75 0 1 1 1.06 1.06l-3.5 3.5a.75.75 0 0 1-1.06 0l-3.5-3.5a.75.75 0 1 1 1.06-1.06l1.97 1.97V4.5a.75.75 0 0 1 .75-.75Zm-4.25 9.75a.75.75 0 0 1 0 1.5h8.5a.75.75 0 0 1 0-1.5h-8.5Z\" clip-rule=\"evenodd\" />\n                            </svg>\n                        </button>\n                    </div>\n                ";
+        $item.append(hoverActionsHtml);
+      }
+    });
 
     // Initialize Masonry if enabled
     if (isMasonry && typeof Masonry !== 'undefined') {
@@ -68,18 +81,23 @@ external_jQuery_default()(document).ready(function () {
     if (hasLightbox) {
       initLightbox($gallery);
     }
+
+    // Initialize Hover Actions (Event Delegation)
+    initHoverActions($gallery);
   });
 
   // Create a single lightbox modal element for the entire page if it doesn't exist
   if (external_jQuery_default()('#ai-gallery-lightbox-modal').length === 0) {
-    external_jQuery_default()('body').append("\n            <div id=\"ai-gallery-lightbox-modal\" class=\"ai-gallery-lightbox-modal\" style=\"display: none;\">\n                <div class=\"modal-content\">\n                    <figure>\n                        <span class=\"close-button\">&times;</span>\n                        <img src=\"\" alt=\"\">\n                    </figure>\n                </div>\n            </div>\n        ");
+    external_jQuery_default()('body').append("\n            <div id=\"ai-gallery-lightbox-modal\" class=\"ai-gallery-lightbox-modal\">\n                <div class=\"modal-content\">\n                    <figure>\n                        <button class=\"close-button\" aria-label=\"Close lightbox\">\n                            <svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\" width=\"20\" height=\"20\">\n                                <path fill-rule=\"evenodd\" d=\"M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z\" clip-rule=\"evenodd\" />\n                            </svg>\n                        </button>\n                        <img src=\"\" alt=\"\">\n                    </figure>\n                </div>\n            </div>\n        ");
 
-    // Close modal functionality
+    // Close modal functionality (using .visible class)
     var $modal = external_jQuery_default()('#ai-gallery-lightbox-modal');
     $modal.on('click', function (e) {
-      // Close if clicking on background or close button
-      if (external_jQuery_default()(e.target).is($modal) || external_jQuery_default()(e.target).is('.close-button')) {
-        $modal.fadeOut();
+      if (external_jQuery_default()(e.target).is($modal) || external_jQuery_default()(e.target).closest('.close-button').length) {
+        $modal.removeClass('visible');
+        setTimeout(function () {
+          external_jQuery_default()('body').css('overflow', '');
+        }, 250);
       }
     });
   }
@@ -97,56 +115,139 @@ external_jQuery_default()(document).ready(function () {
   }
 });
 function initLightbox($gallery) {
-  // Image click handler for lightbox
-  $gallery.on('click', '.gallery-item > figure > img', function (e) {
+  console.log("[Lightbox] Initializing for gallery:", $gallery[0]); // Log gallery init
+
+  // Image click handler for lightbox (Revert to using .visible class)
+  $gallery.on('click', 'figure', function (e) {
     e.preventDefault();
-    e.stopPropagation();
-    var $img = external_jQuery_default()(this);
-    var imageUrl = $img.attr('src');
-    var altText = $img.attr('alt') || 'Gallery image';
-    var $modal = external_jQuery_default()('#ai-gallery-lightbox-modal');
-    var $modalImg = $modal.find('img');
+    console.log("[Lightbox] Figure clicked!"); // Log click event
 
-    // Reset image source and hide modal initially
-    $modalImg.attr('src', '').attr('alt', '');
-    $modal.hide(); // Hide completely initially
+    var $img = external_jQuery_default()(this).find('img');
+    var imageUrl = $img.data('large-src') || $img.attr('src');
+    console.log("[Lightbox] Opening lightbox with image URL:", imageUrl);
+    if (!imageUrl) {
+      console.error("[Lightbox] Error: Could not find image URL for lightbox.");
+      return; // Stop if no URL
+    }
+    var $lightboxModal = external_jQuery_default()('#ai-gallery-lightbox-modal');
+    if ($lightboxModal.length === 0) {
+      console.error("[Lightbox] Error: Modal element #ai-gallery-lightbox-modal not found in DOM.");
+      return; // Stop if modal doesn't exist
+    }
+    console.log("[Lightbox] Modal element found.");
+    var $lightboxImg = $lightboxModal.find('img');
+    if ($lightboxImg.length === 0) {
+      console.error("[Lightbox] Error: Image tag not found inside modal.");
+      return; // Stop if img tag missing
+    }
+    console.log("[Lightbox] Modal image tag found.");
 
-    // Preload image
-    var tempImg = new Image();
-    tempImg.onload = function () {
-      // Set modal image source and alt *after* loaded
-      $modalImg.attr('src', imageUrl).attr('alt', altText);
-      // Show the lightbox modal *after* image is loaded
-      $modal.fadeIn();
-    };
-    tempImg.onerror = function () {
-      // Handle image loading error (optional)
-      console.error("Error loading image for lightbox:", imageUrl);
-      // Optionally show an error message or close the modal
-      $modal.hide(); // Or $modal.fadeOut();
-    };
-    tempImg.src = imageUrl; // Start loading
+    // Set image source
+    $lightboxImg.attr('src', imageUrl);
+    console.log("[Lightbox] Modal image src set to:", imageUrl);
+
+    // Hide body scroll immediately
+    external_jQuery_default()('body').css('overflow', 'hidden');
+    console.log("[Lightbox] Body overflow hidden.");
+
+    // --- Revert to original code using class --- 
+    console.log("[Lightbox] Attempting to add .visible class...");
+    requestAnimationFrame(function () {
+      $lightboxModal.addClass('visible');
+      console.log("[Lightbox] .visible class added.", "Modal visible status:", $lightboxModal.hasClass('visible'));
+    });
+    // --- End Revert ---
   });
 
-  // Info icon click handler
+  // Info icon click handler - NOTE: Info icon is rendered by PHP, we only handle click
   $gallery.on('click', '.image-info-icon', function (e) {
     e.preventDefault();
     e.stopPropagation();
     var $icon = external_jQuery_default()(this);
     var $img = $icon.closest('.gallery-item').find('img');
-    // Try reading the attribute directly
     var parameters = $img.attr('data-parameters') || '';
     console.log("Info icon clicked.");
-    console.log("Image Element:", $img[0]); // Log the image element itself
-    console.log("Attempting to read data-parameters attribute:", parameters); // Log raw attribute value
-
+    console.log("Image Element:", $img[0]);
+    console.log("Attempting to read data-parameters attribute:", parameters);
     if (parameters && parameters.trim() !== '') {
       displayInfoModal(parameters);
     } else {
       console.log("No parameters found or attribute is empty.");
-      // Optionally display a message in the modal if parameters are empty
-      displayInfoModal(''); // Call with empty string to show default message
+      displayInfoModal('');
     }
+  });
+}
+
+// Function to initialize hover actions (Copy URL, Download)
+function initHoverActions($gallery) {
+  // Copy URL Button Click
+  $gallery.on('click', '.copy-url-button', function (e) {
+    e.preventDefault();
+    e.stopPropagation(); // Prevent lightbox/info modal trigger
+
+    var $button = external_jQuery_default()(this);
+    var $img = $button.closest('.gallery-item').find('img');
+    var imageUrl = $img.attr('src');
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(imageUrl).then(function () {
+        console.log('Image URL copied to clipboard!');
+        var originalIcon = $button.html();
+        // Use a checkmark SVG for success indication
+        $button.html('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg>');
+        setTimeout(function () {
+          return $button.html(originalIcon);
+        }, 1500);
+      }, function (err) {
+        console.error('Failed to copy URL: ', err);
+        alert('Failed to copy URL.');
+      });
+    } else {
+      alert('Clipboard API not supported in this browser or context.');
+    }
+  });
+
+  // Download Image Button Click
+  $gallery.on('click', '.download-image-button', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var $img = external_jQuery_default()(this).closest('.gallery-item').find('img');
+    var imageUrl = $img.attr('src');
+    var filename = imageUrl.substring(imageUrl.lastIndexOf('/') + 1) || 'downloaded-image';
+
+    // Use fetch to get the image as a blob (necessary for cross-origin downloads)
+    fetch(imageUrl).then(function (response) {
+      if (!response.ok) {
+        throw new Error("HTTP error! status: ".concat(response.status));
+      }
+      return response.blob();
+    }).then(function (blob) {
+      var url = window.URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      // Set the filename for download
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    })["catch"](function (e) {
+      console.error('Error downloading image:', e);
+      // If fetch fails (e.g., CORS), try direct link as fallback (might open in new tab)
+      try {
+        var a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = imageUrl;
+        a.target = '_blank'; // Open in new tab as fallback
+        a.download = filename; // Attempt download attribute
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } catch (fallbackError) {
+        console.error('Fallback download attempt failed:', fallbackError);
+        alert('Could not download image.');
+      }
+    });
   });
 }
 

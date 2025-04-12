@@ -79,22 +79,38 @@ error_log("[AI Gallery Render] Wrapper attributes string: " . $wrapper_attribute
 		if (!empty($image_id)) {
 			$image_params_raw = get_post_meta(intval($image_id), '_sd_parameters', true);
 		}
-		$image_params_esc = esc_attr($image_params_raw); 
+		$image_params_esc = esc_attr($image_params_raw);
 		$image_width = isset($image['width']) && is_numeric($image['width']) ? intval($image['width']) : null;
 		$image_height = isset($image['height']) && is_numeric($image['height']) ? intval($image['height']) : null;
+
+		// Get 'large' size image URL if lightbox is enabled
+		$large_image_url = '';
+		if ($attributes['lightboxEnabled'] && !empty($image_id)) {
+			$large_image_data = wp_get_attachment_image_src(intval($image_id), 'large', false);
+			if ($large_image_data) {
+				$large_image_url = esc_url($large_image_data[0]);
+				error_log("[AI Gallery Render] Image index {$index}: Found large image URL: {$large_image_url}");
+			} else {
+				error_log("[AI Gallery Render] Image index {$index}: Could not find large image URL, falling back to original: {$image_url}");
+			}
+		}
+		// Use original URL as fallback if large URL not found or lightbox disabled
+		$lightbox_src = !empty($large_image_url) ? $large_image_url : $image_url;
 
 		if (empty($image_url)) {
 			error_log("[AI Gallery Render] Image index {$index} skipped: No URL.");
 			continue; // Skip if no URL
 		}
-		error_log("[AI Gallery Render] Image index {$index} URL: {$image_url}");
+		error_log("[AI Gallery Render] Image index {$index} Thumb URL: {$image_url}");
+		error_log("[AI Gallery Render] Image index {$index} Lightbox URL: {$lightbox_src}");
 		// Log the parameters before assigning to data attribute
 		error_log("[AI Gallery Render] Image index {$index} Parameters RAW (from meta): " . $image_params_raw);
 		error_log("[AI Gallery Render] Image index {$index} Parameters Escaped: " . $image_params_esc); // Log escaped value
 		?>
 		<div class="gallery-item" data-id="<?php echo $image_id; ?>">
 			<figure>
-				<img src="<?php echo $image_url; ?>"
+				<img src="<?php echo $image_url; // Thumbnail URL ?>"
+					 data-large-src="<?php echo $lightbox_src; // Lightbox URL ?>"
 					 alt="<?php echo $image_prompt; ?>"
 					 data-prompt="<?php echo $image_prompt; ?>"
 					 data-parameters="<?php echo $image_params_esc; ?>"
@@ -109,9 +125,11 @@ error_log("[AI Gallery Render] Wrapper attributes string: " . $wrapper_attribute
 					 decoding="async"
 					 loading="lazy">
 				<?php if ($attributes['showImageInfo']): // Conditionally show info icon ?>
-				<div class="image-info-icon">
-					<span class="dashicons dashicons-info"></span>
-				</div>
+				<button class="image-info-icon" title="Show image info">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+					  <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clip-rule="evenodd" />
+					</svg>
+				</button>
 				<?php endif; ?>
 			</figure>
 		</div>
