@@ -2,7 +2,7 @@
 /**
  * Plugin Name: TechPlay Gutenberg Blocks
  * Description: 다운로드 버튼, 이미지 비교, 레퍼런스 링크 블록을 추가하는 플러그인
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: noxwon
  */
 
@@ -10,9 +10,17 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Composer Autoloader는 PHPExiftool을 사용하지 않으므로 제거하거나 주석 처리 가능
+/*
+$composer_autoloader = __DIR__ . '/vendor/autoload.php';
+if (file_exists($composer_autoloader)) {
+    require_once $composer_autoloader;
+}
+*/
+
 class TechPlayGutenbergBlocks {
     public function __construct() {
-        add_action('init', array($this, 'register_blocks'));
+        add_action('init', array($this, 'register_scripts_and_blocks'));
         add_action('enqueue_block_editor_assets', array($this, 'enqueue_editor_assets'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_assets'));
         add_action('rest_api_init', array($this, 'register_rest_routes'));
@@ -23,61 +31,95 @@ class TechPlayGutenbergBlocks {
         add_action('wp_ajax_nopriv_secure_download', array($this, 'handle_secure_download'));
     }
 
-    public function register_blocks() {
-        register_block_type('techplay-blocks/download-button', array(
+    public function register_scripts_and_blocks() {
+        // 에디터 스크립트 등록
+        wp_register_script(
+            'techplay-blocks-editor',
+            plugins_url('build/index.js', __FILE__),
+            array('wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-i18n'),
+            filemtime(plugin_dir_path(__FILE__) . 'build/index.js'),
+            true
+        );
+
+        // 공통 스타일 등록 (에디터 + 프론트)
+        wp_register_style(
+            'techplay-blocks-common-style',
+            plugins_url('build/style.css', __FILE__),
+            array(),
+            filemtime(plugin_dir_path(__FILE__) . 'build/style.css')
+        );
+        
+        // 에디터 전용 스타일 등록
+        wp_register_style(
+            'techplay-blocks-editor-style',
+            plugins_url('build/index.css', __FILE__),
+            array('wp-edit-blocks'),
+            filemtime(plugin_dir_path(__FILE__) . 'build/index.css')
+        );
+
+        // AI 갤러리 프론트엔드 스크립트 등록
+        wp_register_script(
+            'techplay-ai-gallery-frontend-script',
+            plugins_url('build/ai-image-gallery-frontend.js', __FILE__),
+            array('jquery', 'wp-element'),
+            filemtime(plugin_dir_path(__FILE__) . 'build/ai-image-gallery-frontend.js'),
+            true
+        );
+
+        // AI 이미지 갤러리 블록 등록 (block.json 사용)
+        register_block_type( plugin_dir_path( __FILE__ ) . 'src/blocks/ai-image-gallery' );
+
+        register_block_type('techplay-gutenberg-blocks/download-button', array(
             'editor_script' => 'techplay-blocks-editor',
             'editor_style'  => 'techplay-blocks-editor-style',
-            'style'         => 'techplay-blocks-style',
+            'style'         => 'techplay-blocks-common-style',
             'render_callback' => array($this, 'render_download_button')
         ));
 
-        register_block_type('techplay-blocks/image-compare', array(
+        register_block_type('techplay-gutenberg-blocks/image-compare', array(
             'editor_script' => 'techplay-blocks-editor',
             'editor_style'  => 'techplay-blocks-editor-style',
-            'style'         => 'techplay-blocks-style',
+            'style'         => 'techplay-blocks-common-style',
             'render_callback' => array($this, 'render_image_compare')
         ));
 
-        register_block_type('techplay-blocks/reference-links', array(
+        register_block_type('techplay-gutenberg-blocks/reference-links', array(
             'editor_script' => 'techplay-blocks-editor',
             'editor_style'  => 'techplay-blocks-editor-style',
-            'style'         => 'techplay-blocks-style',
+            'style'         => 'techplay-blocks-common-style',
             'render_callback' => array($this, 'render_reference_links')
         ));
     }
 
     public function enqueue_editor_assets() {
-        wp_enqueue_script(
-            'techplay-blocks-editor',
-            plugins_url('build/index.js', __FILE__),
-            array('wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-i18n')
-        );
-
-        wp_enqueue_style(
-            'techplay-blocks-editor-style',
-            plugins_url('build/editor.css', __FILE__)
-        );
+        wp_enqueue_script('techplay-blocks-editor');
+        wp_enqueue_style('techplay-blocks-editor-style');
+        wp_enqueue_style('techplay-blocks-common-style');
     }
 
     public function enqueue_frontend_assets() {
         if (is_singular()) {
             $post = get_post();
-            if (!has_blocks($post->post_content)) {
+            if (!$post || !has_blocks($post->post_content)) {
                 return;
             }
 
-            // 공통 스타일 로드
-            wp_enqueue_style(
-                'techplay-blocks-style',
-                plugins_url('build/style.css', __FILE__),
-                array(),
-                filemtime(plugin_dir_path(__FILE__) . 'build/style.css')
-            );
+            // 공통 스타일 로드 (모든 블록 공통)
+            wp_enqueue_style('techplay-blocks-common-style');
             
             // jQuery 의존성 추가
             wp_enqueue_script('jquery');
             
-            if (has_block('techplay-blocks/download-button', $post)) {
+            // Dashicons 추가
+            wp_enqueue_style('dashicons');
+            
+            // AI 갤러리 블록이 있으면 프론트엔드 스크립트 로드
+            if (has_block('techplay-gutenberg-blocks/ai-image-gallery', $post)) {
+                wp_enqueue_script('techplay-ai-gallery-frontend-script');
+            }
+            
+            // Download 버튼 블록 스크립트 로드
+            if (has_block('techplay-gutenberg-blocks/download-button', $post)) {
                 wp_enqueue_script(
                     'techplay-download-button',
                     plugins_url('build/download-button.js', __FILE__),
@@ -85,15 +127,14 @@ class TechPlayGutenbergBlocks {
                     filemtime(plugin_dir_path(__FILE__) . 'build/download-button.js'),
                     true
                 );
-                
-                // nonce와 ajaxUrl 추가
                 wp_localize_script('techplay-download-button', 'techplayBlocks', array(
                     'ajaxUrl' => admin_url('admin-ajax.php'),
                     'nonce' => wp_create_nonce('techplay-blocks-nonce')
                 ));
             }
             
-            if (has_block('techplay-blocks/image-compare', $post)) {
+            // 이미지 비교 블록 스크립트 로드
+            if (has_block('techplay-gutenberg-blocks/image-compare', $post)) {
                 wp_enqueue_script(
                     'techplay-image-compare',
                     plugins_url('build/image-compare.js', __FILE__),
@@ -103,7 +144,8 @@ class TechPlayGutenbergBlocks {
                 );
             }
             
-            if (has_block('techplay-blocks/reference-links', $post)) {
+            // 레퍼런스 링크 블록 스크립트 로드
+            if (has_block('techplay-gutenberg-blocks/reference-links', $post)) {
                 wp_enqueue_script(
                     'techplay-reference-links',
                     plugins_url('build/reference-links.js', __FILE__),
@@ -601,5 +643,114 @@ class TechPlayGutenbergBlocks {
         return $mime_type;
     }
 }
+
+/**
+ * 이미지(PNG, JPG/JPEG 등)에서 SD 파라미터를 추출하여 메타데이터로 저장하는 함수 (exiftool 직접 호출)
+ *
+ * @param array $metadata      첨부파일 메타데이터 배열.
+ * @param int   $attachment_id 첨부파일 ID.
+ * @return array 수정된 메타데이터 배열.
+ */
+function techplay_extract_image_parameters($metadata, $attachment_id) {
+    $file_path = get_attached_file($attachment_id);
+    $parameters_text = '';
+    error_log("[SD Param Extract - Exiftool] Processing attachment ID: {$attachment_id}, Path: {$file_path}");
+
+    if (!$file_path || !is_file($file_path)) {
+        error_log("[SD Param Extract - Exiftool] File path invalid or not a file for ID {$attachment_id}.");
+        return $metadata;
+    }
+
+    // Check if exec function is available and not disabled for security reasons
+    if (!function_exists('exec')) {
+        error_log("[SD Param Extract - Exiftool] PHP function 'exec' is not available or disabled. Cannot use exiftool.");
+        return $metadata;
+    }
+
+    try {
+        // Construct the exiftool command
+        // -j: Output in JSON format
+        // -Parameters, -UserComment, -ImageDescription: Specify tags to extract (add more if needed)
+        // -charset utf8: Specify UTF-8 for text output (helps with encoding)
+        // escapeshellarg: IMPORTANT for security to prevent command injection
+        $escaped_file_path = escapeshellarg($file_path);
+        $command = "exiftool -j -Parameters -UserComment -ImageDescription -charset utf8 " . $escaped_file_path;
+        error_log("[SD Param Extract - Exiftool] Executing command: {$command}");
+
+        // Execute the command
+        // Use shell_exec to capture the full output easily
+        $output_json = shell_exec($command);
+        
+        if ($output_json === null) {
+             error_log("[SD Param Extract - Exiftool] shell_exec failed for command. Check PHP error logs and permissions for exiftool.");
+             return $metadata;
+        }
+        
+        error_log("[SD Param Extract - Exiftool] Raw JSON output: " . substr($output_json, 0, 500) . "...");
+
+        // exiftool outputs JSON within square brackets if successful
+        if (strpos(trim($output_json), '[') === 0) {
+            // Parse the JSON output
+            $decoded_output = json_decode($output_json, true);
+
+            // Check if JSON decoding was successful and expected structure exists
+            if (json_last_error() === JSON_ERROR_NONE && isset($decoded_output[0]) && is_array($decoded_output[0])) {
+                $exif_data = $decoded_output[0];
+                
+                // Find parameters, prioritizing the 'Parameters' tag (often used by A1111 PNG)
+                if (!empty($exif_data['Parameters'])) {
+                    $parameters_text = $exif_data['Parameters'];
+                    error_log("[SD Param Extract - Exiftool] Found parameters in 'Parameters' tag for ID {$attachment_id}.");
+                } elseif (!empty($exif_data['UserComment'])) {
+                    // Fallback to UserComment (often used by A1111 JPG)
+                    $parameters_text = $exif_data['UserComment'];
+                    error_log("[SD Param Extract - Exiftool] Found parameters in 'UserComment' tag for ID {$attachment_id}.");
+                } elseif (!empty($exif_data['ImageDescription'])) {
+                    // Fallback to ImageDescription
+                    $parameters_text = $exif_data['ImageDescription'];
+                    error_log("[SD Param Extract - Exiftool] Found parameters in 'ImageDescription' tag for ID {$attachment_id}.");
+                }
+
+                if (empty($parameters_text)) {
+                    error_log("[SD Param Extract - Exiftool] Could not find parameters in expected tags (Parameters, UserComment, ImageDescription) for ID {$attachment_id}.");
+                    // Log all available tags for debugging if needed
+                    // error_log("[SD Param Extract - Exiftool] All tags found: " . print_r(array_keys($exif_data), true));
+                }
+            } else {
+                error_log("[SD Param Extract - Exiftool] Failed to decode JSON output or invalid structure for ID {$attachment_id}. JSON Error: " . json_last_error_msg());
+            }
+        } else {
+            error_log("[SD Param Extract - Exiftool] Exiftool did not return valid JSON output (doesn't start with '['). Output: " . $output_json);
+        }
+
+    } catch (Exception $e) {
+        error_log("[SD Param Extract - Exiftool] Exception during exiftool execution for ID {$attachment_id}: " . $e->getMessage());
+        return $metadata;
+    }
+
+    // --- 메타데이터 저장 (기존 로직 유지) ---
+    if (!empty($parameters_text) && is_string($parameters_text)) {
+        error_log("[SD Param Extract - Exiftool] Attempting to save parameters for ID {$attachment_id}:");
+        error_log(substr($parameters_text, 0, 200) . "..."); // 저장할 내용 일부 로그
+        $existing_meta = get_post_meta($attachment_id, '_sd_parameters', true);
+        if ($existing_meta !== $parameters_text) { 
+            $updated = update_post_meta($attachment_id, '_sd_parameters', $parameters_text);
+            if ($updated) {
+                error_log("[SD Param Extract - Exiftool] Successfully saved/updated SD parameters for ID {$attachment_id}.");
+            } else {
+                error_log("[SD Param Extract - Exiftool] Failed to save/update SD parameters for ID {$attachment_id}.");
+            }
+        } else {
+             error_log("[SD Param Extract - Exiftool] SD parameters for ID {$attachment_id} are already up to date.");
+        }
+    } else {
+        error_log("[SD Param Extract - Exiftool] No SD parameters found or extracted to save for ID {$attachment_id}.");
+    }
+
+    return $metadata;
+}
+
+// 필터 훅 연결 유지
+add_filter('wp_generate_attachment_metadata', 'techplay_extract_image_parameters', 10, 2);
 
 new TechPlayGutenbergBlocks(); 

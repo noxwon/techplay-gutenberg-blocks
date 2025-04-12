@@ -1,0 +1,15 @@
+{
+    "name": "root/techplay-gutenberg-blocks",
+    "autoload": {
+        "psr-4": {
+            "Root\\TechplayGutenbergBlocks\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "noxwon",
+            "email": "noxwon@gmail.com"
+        }
+    ],
+    "require": {}
+}

@@ -1,0 +1,49 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "techplay-gutenberg-blocks/ai-image-gallery",
+    "version": "1.0.0",
+    "title": "AI 이미지 갤러리",
+    "category": "media",
+    "icon": "format-gallery",
+    "description": "AI로 생성된 이미지를 표시하는 갤러리 블록입니다.",
+    "supports": {
+        "html": false,
+        "align": ["wide", "full"]
+    },
+    "attributes": {
+        "images": {
+            "type": "array",
+            "default": []
+        },
+        "columns": {
+            "type": "number",
+            "default": 3
+        },
+        "gap": {
+            "type": "number",
+            "default": 16
+        },
+        "imageHeight": {
+            "type": "number",
+            "default": 300
+        },
+        "useMasonry": {
+            "type": "boolean",
+            "default": false
+        },
+        "showImageInfo": {
+            "type": "boolean",
+            "default": true
+        },
+        "lightboxEnabled": {
+            "type": "boolean",
+            "default": true
+        }
+    },
+    "textdomain": "techplay-gutenberg-blocks",
+    "editorScript": "file:./index.js",
+    "editorStyle": "file:./index.css",
+    "style": "file:./style-index.css",
+    "render": "file:./render.php"
+} 
