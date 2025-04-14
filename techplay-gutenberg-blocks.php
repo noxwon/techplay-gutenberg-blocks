@@ -515,7 +515,7 @@ class TechPlayGutenbergBlocks {
                 $download_counts[$file_url] = array(
                     'total' => $data,
                     'daily' => array(
-                        date('Y-m-d') => $data
+                        date_i18n(get_option('date_format')) => $data
                     )
                 );
                 $converted = true;
@@ -599,7 +599,7 @@ class TechPlayGutenbergBlocks {
             $download_counts[$file_url] = array(
                 'total' => $download_counts[$file_url],
                 'daily' => array(
-                    date('Y-m-d') => $download_counts[$file_url]
+                    date_i18n(get_option('date_format')) => $download_counts[$file_url]
                 )
             );
         }
@@ -615,7 +615,7 @@ class TechPlayGutenbergBlocks {
         $download_counts[$file_url]['total']++;
         
         // 날짜별 카운트 증가
-        $today = date('Y-m-d');
+        $today = date_i18n(get_option('date_format'));
         if (!isset($download_counts[$file_url]['daily'][$today])) {
             $download_counts[$file_url]['daily'][$today] = 0;
         }

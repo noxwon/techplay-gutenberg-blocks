@@ -28,8 +28,8 @@ $defaults = array(
     'imageHeight' => 300,
     'imageFit' => 'cover',
     'useMasonry' => false,
-    'lightboxEnabled' => true, // Assuming lightbox is an attribute
-    'showImageInfo' => true    // Assuming show info is an attribute
+    'lightboxEnabled' => true, 
+    'showImageInfo' => true    
 );
 
 // Merge defaults with provided attributes
@@ -45,52 +45,39 @@ error_log("[AI Gallery Render] Found " . count($attributes['images']) . " images
 
 // Prepare wrapper attributes
 $wrapper_classes = array(
-    // 'wp-block-techplay-gutenberg-blocks-ai-image-gallery', // Base class added by wrapper
+    'wp-block-techplay-gutenberg-blocks-ai-image-gallery', // 블록 기본 클래스 추가
     'columns-' . intval($attributes['columns']),
     'image-fit-' . esc_attr($attributes['imageFit']),
 );
 
-// Remove the temporary test code
-// // Always add 'has-masonry-layout' for JS trigger (TEMPORARY TEST)
-// $wrapper_classes[] = 'has-masonry-layout'; 
-// error_log("[AI Gallery Render] TEMPORARY TEST: Forcing has-masonry-layout class.");
-
-// Conditionally add .has-masonry-layout based on the attribute
-if (!empty($attributes['masonryEnabled'])) {
+// 명시적인 클래스 할당
+if (isset($attributes['useMasonry']) && $attributes['useMasonry'] === true) {
     $wrapper_classes[] = 'has-masonry-layout';
-    error_log("[AI Gallery Render] masonryEnabled is true, adding has-masonry-layout class.");
+    error_log("[AI Gallery Render] useMasonry is TRUE, adding has-masonry-layout class");
 } else {
-    error_log("[AI Gallery Render] masonryEnabled is false, NOT adding has-masonry-layout class.");
-    // If masonry is disabled, add the image height class
-    $wrapper_classes[] = 'image-height-' . intval($attributes['imageHeight']); 
+    $wrapper_classes[] = 'image-height-' . intval($attributes['imageHeight']);
+    error_log("[AI Gallery Render] useMasonry is FALSE, adding image-height-" . intval($attributes['imageHeight']) . " class");
 }
 
 if ($attributes['lightboxEnabled']) {
     $wrapper_classes[] = 'has-lightbox';
 }
 
-// Remove the duplicate is-style-masonry logic
-// // Add 'is-style-masonry' class if Masonry is enabled
-// $use_masonry = isset($attributes['useMasonry']) ? $attributes['useMasonry'] : false;
-// if ($use_masonry) {
-//     $wrapper_classes[] = 'is-style-masonry';
-// }
+if ($attributes['showImageInfo']) {
+    $wrapper_classes[] = 'show-image-info';
+}
 
-// Prepare inline styles for CSS variables
+// 명시적이고 완전한 CSS 변수 세트
 $inline_styles = sprintf(
-    '--columns: %d; --gap: %dpx;',
+    '--columns: %d; --gap: %dpx; --image-height: %dpx;',
     intval($attributes['columns']),
-    intval($attributes['gap'])
+    intval($attributes['gap']),
+    intval($attributes['imageHeight'])
 );
-
-// Remove fixed height logic
-// if (!$attributes['useMasonry']) {
-//     // $inline_styles .= sprintf(' --imageHeight: %dpx;', intval($attributes['imageHeight'])); 
-// }
 
 $wrapper_attributes_string = get_block_wrapper_attributes(array(
     'class' => implode(' ', $wrapper_classes),
-    'style' => $inline_styles // Add inline styles here
+    'style' => $inline_styles
 ));
 error_log("[AI Gallery Render] Wrapper attributes string: " . $wrapper_attributes_string);
 
@@ -140,23 +127,14 @@ error_log("[AI Gallery Render] Wrapper attributes string: " . $wrapper_attribute
 		?>
 		<div class="gallery-item" data-id="<?php echo $image_id; ?>">
 			<figure>
-				<img src="<?php echo $image_url; // Thumbnail URL ?>"
-					 data-large-src="<?php echo $lightbox_src; // Lightbox URL ?>"
+				<img src="<?php echo $image_url; ?>"
+					 data-large-src="<?php echo $lightbox_src; ?>"
 					 alt="<?php echo $image_prompt; ?>"
 					 data-prompt="<?php echo $image_prompt; ?>"
 					 data-parameters="<?php echo $image_params_esc; ?>"
-					 <?php 
-					 // REMOVED: Apply aspect-ratio style ONLY for masonry and if dimensions are valid
-					 // Masonry aspect ratio is handled by CSS (width: 100%, height: auto)
-					 // if ($attributes['useMasonry'] && $image_width && $image_height && $image_height > 0) {
-					 // 	 $aspect_ratio_style = sprintf('style="aspect-ratio: %d/%d;"', $image_width, $image_height);
-					 // 	 echo $aspect_ratio_style;
-					 // 	 error_log("[AI Gallery Render] Image index {$index}: Applied aspect-ratio style: {$aspect_ratio_style}");
-					 // }
-					 ?>
 					 decoding="async"
 					 loading="lazy">
-				<?php if ($attributes['showImageInfo']): // Keep the info icon ?>
+				<?php if ($attributes['showImageInfo']): ?>
 				<button class="image-info-icon" title="Show image info">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
 					  <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clip-rule="evenodd" />
@@ -165,11 +143,11 @@ error_log("[AI Gallery Render] Wrapper attributes string: " . $wrapper_attribute
 				<?php endif; ?>
 			</figure>
             
-            <?php // Re-add hover action buttons HTML ?>
+            <?php // Ensure hover action buttons HTML is present ?>
             <div class="image-hover-actions">
                 <button class="copy-url-button" title="Copy Image URL">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
-                      <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.871a.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.665l3-3Z"></path>
+                      <path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.871a.75.75 0 0 0 .977-1.138a2.5 2.5 0 0 1-.142-3.665l3-3Z"></path>
                       <path d="M8.603 17.47a4 4 0 0 1-5.656-5.656l3-3a4 4 0 0 1 5.871.225a.75.75 0 0 1-1.138.977a2.5 2.5 0 0 0-3.665-.142l-3 3a2.5 2.5 0 0 0 3.536 3.536l1.225-1.224a.75.75 0 0 1 1.061 1.06l-1.224 1.224Z"></path>
                     </svg>
                 </button>

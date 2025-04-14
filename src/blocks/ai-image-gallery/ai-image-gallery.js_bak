@@ -1,0 +1,252 @@
+/**
+ * WordPress 의존성
+ */
+import { __ } from '@wordpress/i18n';
+import { registerBlockType } from '@wordpress/blocks';
+import { useBlockProps, InspectorControls, MediaPlaceholder } from '@wordpress/block-editor';
+import { 
+    PanelBody, 
+    TextControl,
+    TextareaControl,
+    RangeControl,
+    ToggleControl,
+    SelectControl,
+    Button 
+} from '@wordpress/components';
+
+/**
+ * 내부 의존성
+ */
+import './editor.scss';
+
+/**
+ * AI 이미지 갤러리 블록 등록
+ */
+registerBlockType('techplay-gutenberg-blocks/ai-image-gallery', {
+    title: __('AI 이미지 갤러리', 'techplay-gutenberg-blocks'),
+    icon: 'format-gallery',
+    category: 'media',
+    description: __('AI로 생성된 이미지를 갤러리 형식으로 표시합니다.', 'techplay-gutenberg-blocks'),
+    supports: {
+        html: false,
+        align: ['wide', 'full']
+    },
+    attributes: {
+        title: {
+            type: 'string',
+            default: '',
+        },
+        description: {
+            type: 'string',
+            default: '',
+        },
+        columns: {
+            type: 'number',
+            default: 3,
+        },
+        gap: {
+            type: 'number',
+            default: 16,
+        },
+        masonryEnabled: {
+            type: 'boolean',
+            default: true,
+        },
+        lightboxEnabled: {
+            type: 'boolean',
+            default: true,
+        },
+        imageSize: {
+            type: 'string',
+            default: 'medium_large',
+        },
+        images: {
+            type: 'array',
+            default: [],
+        },
+    },
+
+    /**
+     * 편집기 구성요소
+     */
+    edit: function ({ attributes, setAttributes }) {
+        const blockProps = useBlockProps({
+            className: `ai-image-gallery-editor ${attributes.masonryEnabled ? 'has-masonry-layout' : ''}`,
+        });
+
+        // 이미지 컬렉션 변경 핸들러
+        const onMediaChange = (selectedMedia) => {
+            const newImages = selectedMedia.map(media => {
+                return {
+                    id: media.id,
+                    url: media.url,
+                    alt: media.alt || '',
+                    caption: media.caption || '',
+                    prompt: media.description || '',
+                    parameters: media.description ? extractParameters(media.description) : ''
+                };
+            });
+            setAttributes({ images: newImages });
+        };
+
+        // 제목 변경 핸들러
+        const onTitleChange = (title) => {
+            setAttributes({ title });
+        };
+
+        // 설명 변경 핸들러
+        const onDescriptionChange = (description) => {
+            setAttributes({ description });
+        };
+
+        // 컬럼 수 변경 핸들러
+        const onColumnsChange = (columns) => {
+            setAttributes({ columns });
+        };
+
+        // 간격 변경 핸들러
+        const onGapChange = (gap) => {
+            setAttributes({ gap });
+        };
+
+        // Masonry 레이아웃 변경 핸들러
+        const onMasonryChange = (masonryEnabled) => {
+            setAttributes({ masonryEnabled });
+        };
+
+        // 라이트박스 변경 핸들러
+        const onLightboxChange = (lightboxEnabled) => {
+            setAttributes({ lightboxEnabled });
+        };
+
+        // 이미지 크기 변경 핸들러
+        const onImageSizeChange = (imageSize) => {
+            setAttributes({ imageSize });
+        };
+
+        // 모든 이미지 제거 핸들러
+        const removeAllImages = () => {
+            setAttributes({ images: [] });
+        };
+
+        // 이미지 설명에서 매개변수 추출 함수
+        const extractParameters = (description) => {
+            const match = description.match(/Parameters:\s*([\s\S]*)/);
+            return match ? match[1].trim() : '';
+        };
+
+        return (
+            <>
+                <InspectorControls>
+                    <PanelBody title={__('갤러리 설정', 'techplay-gutenberg-blocks')} initialOpen={true}>
+                        <TextControl
+                            label={__('제목', 'techplay-gutenberg-blocks')}
+                            value={attributes.title}
+                            onChange={onTitleChange}
+                        />
+                        <TextareaControl
+                            label={__('설명', 'techplay-gutenberg-blocks')}
+                            value={attributes.description}
+                            onChange={onDescriptionChange}
+                        />
+                        <RangeControl
+                            label={__('컬럼 수', 'techplay-gutenberg-blocks')}
+                            value={attributes.columns}
+                            onChange={onColumnsChange}
+                            min={1}
+                            max={6}
+                        />
+                        <RangeControl
+                            label={__('간격(px)', 'techplay-gutenberg-blocks')}
+                            value={attributes.gap}
+                            onChange={onGapChange}
+                            min={0}
+                            max={50}
+                        />
+                        <ToggleControl
+                            label={__('Masonry 레이아웃', 'techplay-gutenberg-blocks')}
+                            checked={attributes.masonryEnabled}
+                            onChange={onMasonryChange}
+                        />
+                        <ToggleControl
+                            label={__('라이트박스 활성화', 'techplay-gutenberg-blocks')}
+                            checked={attributes.lightboxEnabled}
+                            onChange={onLightboxChange}
+                        />
+                        <SelectControl
+                            label={__('이미지 크기', 'techplay-gutenberg-blocks')}
+                            value={attributes.imageSize}
+                            options={[
+                                { label: __('썸네일', 'techplay-gutenberg-blocks'), value: 'thumbnail' },
+                                { label: __('중간', 'techplay-gutenberg-blocks'), value: 'medium' },
+                                { label: __('중간 대형', 'techplay-gutenberg-blocks'), value: 'medium_large' },
+                                { label: __('대형', 'techplay-gutenberg-blocks'), value: 'large' },
+                                { label: __('전체 크기', 'techplay-gutenberg-blocks'), value: 'full' },
+                            ]}
+                            onChange={onImageSizeChange}
+                        />
+                    </PanelBody>
+                </InspectorControls>
+
+                <div {...blockProps}>
+                    {attributes.title && (
+                        <h2 className="gallery-title">{attributes.title}</h2>
+                    )}
+                    
+                    {attributes.description && (
+                        <div className="gallery-description">{attributes.description}</div>
+                    )}
+
+                    <div className="gallery-preview">
+                        {attributes.images.length > 0 ? (
+                            <>
+                                <div 
+                                    className={`gallery-grid columns-${attributes.columns} gap-${attributes.gap} ${attributes.masonryEnabled ? 'has-masonry-layout' : ''}`}
+                                    style={{ gap: `${attributes.gap}px` }}
+                                >
+                                    {attributes.images.map((image, index) => (
+                                        <div key={index} className="gallery-item">
+                                            <figure>
+                                                <img src={image.url} alt={image.alt} />
+                                                {image.prompt && (
+                                                    <div className="image-info-icon">i</div>
+                                                )}
+                                            </figure>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="gallery-actions">
+                                    <Button 
+                                        isDestructive
+                                        onClick={removeAllImages}
+                                    >
+                                        {__('모든 이미지 제거', 'techplay-gutenberg-blocks')}
+                                    </Button>
+                                </div>
+                            </>
+                        ) : (
+                            <MediaPlaceholder
+                                labels={{
+                                    title: __('AI 이미지 갤러리', 'techplay-gutenberg-blocks'),
+                                    instructions: __('AI로 생성된 이미지를 선택하세요. 여러 이미지를 선택할 수 있습니다.', 'techplay-gutenberg-blocks'),
+                                }}
+                                onSelect={onMediaChange}
+                                accept="image/*"
+                                allowedTypes={['image']}
+                                multiple={true}
+                                value={attributes.images}
+                            />
+                        )}
+                    </div>
+                </div>
+            </>
+        );
+    },
+
+    /**
+     * 저장 함수 (서버 사이드 렌더링)
+     */
+    save: function () {
+        return null;
+    },
+}); 
