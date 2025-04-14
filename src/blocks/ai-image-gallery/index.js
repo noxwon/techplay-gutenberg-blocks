@@ -8,9 +8,9 @@ import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 import './editor.scss';
 import './style.scss';
-import './ai-image-gallery';
+// import './ai-image-gallery'; // Consider if this import is necessary in edit context
 
-// SD 파라미터 파싱 함수
+// SD 파라미터 파싱 함수 (Keep if needed for edit view, otherwise remove)
 function parseSDParameters(description) {
     const params = {};
     const regex = /(\w+):\s*([^,\n]+)/g;
@@ -51,40 +51,51 @@ registerBlockType('techplay-gutenberg-blocks/ai-image-gallery', {
         showImageInfo: {
             type: 'boolean',
             default: true
+        },
+        lightboxEnabled: {
+             type: 'boolean',
+             default: true
         }
     },
 
-    edit: ({ attributes, setAttributes }) => {
-        const { columns, gap, images, useMasonry, showImageInfo, imageHeight } = attributes;
+    edit: ({ attributes, setAttributes, isSelected }) => {
+        const { columns, gap, images, useMasonry, showImageInfo, imageHeight, lightboxEnabled } = attributes;
         const blockProps = useBlockProps({
-            className: `wp-block-techplay-gutenberg-blocks-ai-image-gallery columns-${columns} gap-${gap} height-${imageHeight} ${useMasonry ? 'has-masonry' : ''}`
+            className: [
+                'wp-block-techplay-gutenberg-blocks-ai-image-gallery',
+                `columns-${columns}`,
+                `gap-${gap}`,
+                useMasonry ? 'has-masonry-layout' : '',
+                lightboxEnabled ? 'has-lightbox' : ''
+            ].filter(Boolean).join(' '),
+            style: {
+                '--columns': columns,
+                '--gap': `${gap}px`
+            }
         });
 
         const onSelectImages = (newImages) => {
-            const updatedImages = newImages.map(image => {
-                let params = {};
-                if (image.description) {
-                    try {
-                        params = parseSDParameters(image.description);
-                    } catch (e) {
-                        console.error('Error parsing SD parameters:', e);
-                    }
-                }
-
-                return {
+            const updatedImages = newImages.map(image => ({
                     url: image.url,
-                    alt: image.alt,
+                alt: image.alt || image.caption || '',
                     id: image.id,
-                    ...params
-                };
-            });
-
+                width: image.width,
+                height: image.height
+            }));
             setAttributes({ images: updatedImages });
         };
 
+        const removeImage = (indexToRemove) => {
+            const newImages = images.filter((_, index) => index !== indexToRemove);
+            setAttributes({ images: newImages });
+        };
+
+        console.log("[Edit - Full Code] Function called. isSelected:", isSelected);
+
         return (
             <>
-                <InspectorControls>
+                { isSelected && (
+                    <InspectorControls key="inspector-full">
                     <PanelBody title={__('갤러리 설정', 'techplay-gutenberg-blocks')}>
                         <MediaUploadCheck>
                             <MediaUpload
@@ -94,74 +105,82 @@ registerBlockType('techplay-gutenberg-blocks/ai-image-gallery', {
                                 gallery
                                 value={images.map(img => img.id)}
                                 render={({ open }) => (
-                                    <Button
-                                        onClick={open}
-                                        isPrimary
-                                    >
-                                        {images.length > 0 ? '이미지 편집' : '이미지 추가'}
+                                        <Button onClick={open} isPrimary>
+                                            {images.length > 0 ? __('이미지 편집', 'techplay-gutenberg-blocks') : __('이미지 추가', 'techplay-gutenberg-blocks')}
                                     </Button>
                                 )}
                             />
                         </MediaUploadCheck>
                         <RangeControl
                             label={__('열 수', 'techplay-gutenberg-blocks')}
-                            value={Number(columns)}
-                            onChange={(value) => setAttributes({ columns: Number(value) })}
+                                value={Number(columns)}
+                                onChange={(value) => setAttributes({ columns: Number(value) })}
                             min={1}
                             max={6}
                         />
                         <RangeControl
-                            label={__('간격', 'techplay-gutenberg-blocks')}
+                                label={__('간격 (px)', 'techplay-gutenberg-blocks')}
                             value={gap}
                             onChange={(value) => setAttributes({ gap: value })}
-                            min={8}
+                                min={0}
                             max={48}
                         />
-                        <RangeControl
-                            label={__('이미지 높이', 'techplay-gutenberg-blocks')}
-                            value={imageHeight}
-                            onChange={(value) => setAttributes({ imageHeight: value })}
-                            min={100}
-                            max={600}
-                        />
-                        <ToggleControl
-                            label={__('메이슨리 레이아웃', 'techplay-gutenberg-blocks')}
-                            checked={useMasonry}
-                            onChange={(value) => setAttributes({ useMasonry: value })}
-                        />
-                        <ToggleControl
-                            label={__('이미지 정보 표시', 'techplay-gutenberg-blocks')}
-                            checked={showImageInfo}
-                            onChange={(value) => setAttributes({ showImageInfo: value })}
-                        />
+                            <ToggleControl
+                                label={__('메이슨리 레이아웃', 'techplay-gutenberg-blocks')}
+                                checked={useMasonry}
+                                onChange={(value) => setAttributes({ useMasonry: value })}
+                            />
+                             <ToggleControl
+                                label={__('라이트박스 활성화', 'techplay-gutenberg-blocks')}
+                                checked={lightboxEnabled}
+                                onChange={(value) => setAttributes({ lightboxEnabled: value })}
+                            />
+                            <ToggleControl
+                                label={__('이미지 정보 표시 (프론트엔드)', 'techplay-gutenberg-blocks')}
+                                checked={showImageInfo}
+                                onChange={(value) => setAttributes({ showImageInfo: value })}
+                            />
                     </PanelBody>
                 </InspectorControls>
+                )}
                 <div {...blockProps}>
                     {images.map((image, index) => (
-                        <div key={index} className="gallery-item" data-id={image.id}>
+                        <div key={image.id || index} className="gallery-item" data-id={image.id}>
                             <figure>
                                 <img 
                                     src={image.url} 
                                     alt={image.alt || ''} 
-                                    data-prompt={image.prompt || ''}
-                                    data-parameters={image.parameters || ''}
                                 />
-                                {showImageInfo && (
-                                    <div className="image-info-icon">
-                                        <span className="dashicons dashicons-info"></span>
-                                    </div>
+                                { isSelected && ( 
+                                    <Button 
+                                        className="remove-image-button"
+                                        icon="no-alt"
+                                        label={__('Remove image', 'techplay-gutenberg-blocks')}
+                                        onClick={() => removeImage(index)}
+                                    />
                                 )}
                             </figure>
                         </div>
                     ))}
+                    { images.length === 0 && isSelected && (
+                         <MediaUploadCheck>
+                            <MediaUpload
+                                onSelect={onSelectImages}
+                                allowedTypes={['image']}
+                                multiple
+                                gallery
+                                render={({ open }) => (
+                                     <Button className="add-images-placeholder" onClick={open} isSecondary>
+                                         {__('갤러리에 이미지 추가', 'techplay-gutenberg-blocks')}
+                                     </Button>
+                                )}
+                            />
+                        </MediaUploadCheck>
+                    )}
                 </div>
             </>
         );
     },
 
-    // save 함수를 제거하고 render.php를 사용하도록 변경
-    render: ({ attributes }) => {
-        // render.php가 자동으로 호출됨
-        return null;
-    }
+    save: () => null, // Use dynamic rendering (render.php)
 }); 

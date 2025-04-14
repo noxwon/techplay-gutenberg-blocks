@@ -1,9 +1,10 @@
 <?php
 /**
  * Plugin Name: TechPlay Gutenberg Blocks
- * Description: 다운로드 버튼, 이미지 비교, 레퍼런스 링크 블록을 추가하는 플러그인
- * Version: 1.1.0
+ * Description: 다운로드 버튼, 이미지 비교, 레퍼런스 링크, AI 이미지 갤러리 블록을 추가하는 플러그인
+ * Version: 1.2.0
  * Author: noxwon
+ * License: MIT
  */
 
 if (!defined('ABSPATH')) {
@@ -48,22 +49,13 @@ class TechPlayGutenbergBlocks {
             array(),
             filemtime(plugin_dir_path(__FILE__) . 'build/style.css')
         );
-        
+
         // 에디터 전용 스타일 등록
         wp_register_style(
             'techplay-blocks-editor-style',
             plugins_url('build/index.css', __FILE__),
             array('wp-edit-blocks'),
             filemtime(plugin_dir_path(__FILE__) . 'build/index.css')
-        );
-
-        // AI 갤러리 프론트엔드 스크립트 등록
-        wp_register_script(
-            'techplay-ai-gallery-frontend-script',
-            plugins_url('build/ai-image-gallery-frontend.js', __FILE__),
-            array('jquery', 'wp-element'),
-            filemtime(plugin_dir_path(__FILE__) . 'build/ai-image-gallery-frontend.js'),
-            true
         );
 
         // AI 이미지 갤러리 블록 등록 (block.json 사용)
@@ -98,43 +90,103 @@ class TechPlayGutenbergBlocks {
     }
 
     public function enqueue_frontend_assets() {
+        error_log('[Frontend Assets] enqueue_frontend_assets function called.');
+        
         if (is_singular()) {
+            error_log('[Frontend Assets] is_singular() is true.');
             $post = get_post();
-            if (!$post || !has_blocks($post->post_content)) {
+            if (!$post) {
+                error_log('[Frontend Assets] No post object found.');
                 return;
             }
 
-            // 공통 스타일 로드 (모든 블록 공통)
+            $content = $post->post_content;
+            $blocks = parse_blocks($content);
+            
+            if (empty($blocks)) {
+                error_log('[Frontend Assets] No blocks found after parsing content.');
+                return;
+            }
+            error_log('[Frontend Assets] Found ' . count($blocks) . ' top-level blocks after parsing.');
+
+            // Log actual block names found at the top level
+            $found_block_names = array();
+            foreach ($blocks as $block) {
+                if (isset($block['blockName'])) {
+                    $found_block_names[] = $block['blockName'];
+                }
+            }
+            error_log('[Frontend Assets] Top-level block names found: ' . implode(', ', $found_block_names));
+
+            // 공통 스타일 로드
             wp_enqueue_style('techplay-blocks-common-style');
-            
-            // jQuery 의존성 추가
-            wp_enqueue_script('jquery');
-            
-            // Dashicons 추가
             wp_enqueue_style('dashicons');
-            
-            // AI 갤러리 블록이 있으면 프론트엔드 스크립트 로드
-            if (has_block('techplay-gutenberg-blocks/ai-image-gallery', $post)) {
-                wp_enqueue_script('techplay-ai-gallery-frontend-script');
+
+            // --- Script Loading --- 
+
+            $load_main_script = false;
+            $has_image_compare = false;
+            $has_download_button = false;
+            $has_reference_links = false;
+            $has_ai_gallery = false;
+
+            // Simplified check (Top-level only for now)
+            foreach ($blocks as $block) {
+                if (isset($block['blockName'])) {
+                    $block_name = trim($block['blockName']);
+                    error_log("[DEBUG] Checking block: " . $block_name);
+                    if ($block_name === 'techplay-blocks/image-compare') {
+                        $has_image_compare = true;
+                    }
+                    if ($block_name === 'techplay-blocks/download-button') {
+                        $has_download_button = true;
+                    }
+                    if ($block_name === 'techplay-blocks/reference-links') {
+                        $has_reference_links = true;
+                    }
+                    if ($block_name === 'techplay-gutenberg-blocks/ai-image-gallery' || $block_name === 'techplay-blocks/ai-image-gallery') {
+                        $has_ai_gallery = true;
+                    }
+                }
+                // Note: Inner block check removed for simplification
             }
             
-            // Download 버튼 블록 스크립트 로드
-            if (has_block('techplay-gutenberg-blocks/download-button', $post)) {
+            error_log("[Frontend Assets] Block check results (SIMPLE CHECK, Corrected Names): ImageCompare={$has_image_compare}, DownloadButton={$has_download_button}, ReferenceLinks={$has_reference_links}, AIGallery={$has_ai_gallery}");
+
+            // 1. AI Gallery Frontend Script
+            if ($has_ai_gallery) {
+                wp_enqueue_script('masonry');
+                wp_enqueue_script('imagesloaded');
                 wp_enqueue_script(
-                    'techplay-download-button',
-                    plugins_url('build/download-button.js', __FILE__),
-                    array('jquery'),
-                    filemtime(plugin_dir_path(__FILE__) . 'build/download-button.js'),
+                    'techplay-ai-gallery-frontend-script',
+                    plugins_url('build/ai-image-gallery-frontend.js', __FILE__),
+                    array('jquery', 'masonry', 'imagesloaded'),
+                    filemtime(plugin_dir_path(__FILE__) . 'build/ai-image-gallery-frontend.js'),
                     true
                 );
-                wp_localize_script('techplay-download-button', 'techplayBlocks', array(
-                    'ajaxUrl' => admin_url('admin-ajax.php'),
-                    'nonce' => wp_create_nonce('techplay-blocks-nonce')
-                ));
+                error_log('[Conditional Load] Enqueued AI Gallery Frontend Script.');
+            }
+
+            // 2. Check if other blocks needing the main script exist
+            if ($has_image_compare || $has_download_button || $has_reference_links) {
+                $load_main_script = true;
+                error_log('[Frontend Assets] $load_main_script set to true.');
+            } else {
+                error_log('[Frontend Assets] $load_main_script remains false.');
             }
             
-            // 이미지 비교 블록 스크립트 로드
-            if (has_block('techplay-gutenberg-blocks/image-compare', $post)) {
+            // 3. Enqueue the main script bundle IF NEEDED by blocks other than AI Gallery
+            // Note: If frontend logic for these blocks is self-contained and doesn't rely on index.js, 
+            //       enqueuing index.js might not be necessary. Re-evaluate based on frontend.js contents.
+            if ($load_main_script) {
+                 wp_enqueue_script('techplay-blocks-editor');
+                 error_log('[Conditional Load] Enqueued main script (techplay-blocks-editor) for frontend block(s).');
+            } else {
+                error_log('[Conditional Load] Main script (techplay-blocks-editor) NOT enqueued.');
+            }
+
+            // 4. Enqueue individual frontend scripts if their corresponding block exists
+            if ($has_image_compare) {
                 wp_enqueue_script(
                     'techplay-image-compare',
                     plugins_url('build/image-compare.js', __FILE__),
@@ -142,10 +194,33 @@ class TechPlayGutenbergBlocks {
                     filemtime(plugin_dir_path(__FILE__) . 'build/image-compare.js'),
                     true
                 );
+                error_log('[Conditional Load] Enqueued Image Compare Frontend Script.');
             }
             
-            // 레퍼런스 링크 블록 스크립트 로드
-            if (has_block('techplay-gutenberg-blocks/reference-links', $post)) {
+            // Enqueue download button script (Assuming build/download-button.js exists based on webpack config)
+            if ($has_download_button) {
+                 wp_enqueue_script(
+                    'techplay-download-button',
+                    plugins_url('build/download-button.js', __FILE__),
+                    array('jquery'),
+                    filemtime(plugin_dir_path(__FILE__) . 'build/download-button.js'),
+                    true
+                );
+                 error_log('[Conditional Load] Enqueued Download Button Frontend Script.');
+                 // Localize script AFTER enqueuing the specific script it needs
+                 if (wp_script_is('techplay-download-button', 'registered') || wp_script_is('techplay-download-button', 'enqueued')) {
+                     wp_localize_script('techplay-download-button', 'techplayBlocks', array( 
+                         'ajaxUrl' => admin_url('admin-ajax.php'),
+                         'nonce' => wp_create_nonce('techplay-blocks-nonce')
+                     ));
+                     error_log('[Localization] Localized data for download button attached to techplay-download-button.');
+                 } else {
+                     error_log('[Localization Error] Could not localize for download button. Handle techplay-download-button not ready?');
+                 }
+            }
+            
+            // Enqueue reference links script (Assuming build/reference-links.js exists based on webpack config)
+            if ($has_reference_links) {
                 wp_enqueue_script(
                     'techplay-reference-links',
                     plugins_url('build/reference-links.js', __FILE__),
@@ -153,7 +228,10 @@ class TechPlayGutenbergBlocks {
                     filemtime(plugin_dir_path(__FILE__) . 'build/reference-links.js'),
                     true
                 );
+                 error_log('[Conditional Load] Enqueued Reference Links Frontend Script.');
             }
+        } else {
+            error_log('[Frontend Assets] is_singular() is false. Assets not loaded.');
         }
     }
 
@@ -252,6 +330,24 @@ class TechPlayGutenbergBlocks {
             return '';
         }
 
+        // Helper closure to ensure HTTPS
+        $ensure_https = function($url) {
+            if ($url && strpos($url, 'http://') === 0) {
+                return str_replace('http://', 'https://', $url);
+            }
+            return $url;
+        };
+
+        $image1_url_raw = isset($attributes['image1']['url']) ? $attributes['image1']['url'] : '';
+        $image2_url_raw = isset($attributes['image2']['url']) ? $attributes['image2']['url'] : '';
+        
+        $image1_url = $ensure_https($image1_url_raw);
+        $image2_url = $ensure_https($image2_url_raw);
+
+        // Add error log for debugging
+        error_log("[Image Compare Render] Image 1 URL Raw: {$image1_url_raw}, Processed: {$image1_url}");
+        error_log("[Image Compare Render] Image 2 URL Raw: {$image2_url_raw}, Processed: {$image2_url}");
+
         return sprintf(
             '<div class="wp-block-techplay-image-compare">
                 <div class="image-compare-container">
@@ -260,9 +356,9 @@ class TechPlayGutenbergBlocks {
                     <div class="image-compare-separator"></div>
                 </div>
             </div>',
-            esc_url($attributes['image1']['url']),
+            esc_url($image1_url), // Use the processed URL
             esc_attr($attributes['image1']['alt'] ?? ''),
-            esc_url($attributes['image2']['url']),
+            esc_url($image2_url), // Use the processed URL
             esc_attr($attributes['image2']['alt'] ?? '')
         );
     }

@@ -47,31 +47,27 @@ registerBlockType('techplay-gutenberg-blocks/ai-image-gallery', {
     },
 
     edit: function(props) {
-        const { attributes, setAttributes } = props;
+        const { attributes, setAttributes, clientId } = props;
         const { columns, gap, images, lightboxEnabled, masonryEnabled, imageFit, imageHeight, showImageInfo } = attributes;
         const galleryRef = useRef(null);
 
         const blockProps = useBlockProps({
-            className: `wp-block-techplay-gutenberg-blocks-ai-image-gallery${masonryEnabled ? ' has-masonry' : ''} columns-${columns} gap-${gap} image-height-${imageHeight} image-fit-${imageFit}`
+            className: 'wp-block-techplay-gutenberg-blocks-ai-image-gallery' + 
+                       ` columns-${columns}` + 
+                       ` gap-${gap}` + 
+                       ` image-fit-${imageFit}` + 
+                       (masonryEnabled ? ' has-masonry-layout' : ` image-height-${imageHeight}`)
         });
 
         useEffect(() => {
-            if (galleryRef.current && images.length > 0) {
-                const imgs = galleryRef.current.querySelectorAll('img');
+            if (galleryRef.current) {
+                const imgs = galleryRef.current.querySelectorAll('.gallery-item img');
+                console.log(`[Image Height Effect] Masonry Enabled: ${masonryEnabled}. Setting img height.`);
                 imgs.forEach(img => {
-                    if (!img.complete) {
-                        img.addEventListener('load', () => {
-                            // 이미지가 로드되면 레이아웃 업데이트
-                            if (masonryEnabled) {
-                                img.style.height = 'auto';
-                            }
-                        });
-                    } else if (masonryEnabled) {
-                        img.style.height = 'auto';
-                    }
+                    img.style.height = masonryEnabled ? 'auto' : '';
                 });
             }
-        }, [images, masonryEnabled]);
+        }, [masonryEnabled, images]);
 
         const onSelectImages = (selectedImages) => {
             const newImages = selectedImages.map(image => ({
@@ -161,16 +157,20 @@ registerBlockType('techplay-gutenberg-blocks/ai-image-gallery', {
                                     data-prompt={image.prompt || ''}
                                     data-parameters={image.parameters || ''}
                                 />
-                                <div className="image-info-icon">
-                                    <span className="dashicons dashicons-info"></span>
-                                </div>
+                                {showImageInfo && (
+                                    <button className="image-info-icon" title="Show image info">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="18" height="18"><path fillRule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clipRule="evenodd"></path></svg>
+                                    </button>
+                                )}
                                 <Button 
-                                    isDestructive
+                                    isDestructive 
+                                    isSmall
                                     onClick={() => removeImage(index)}
                                     className="remove-image-button"
-                                >
-                                    삭제
-                                </Button>
+                                    style={{ position: 'absolute', top: '5px', right: '5px', zIndex: 11 }}
+                                    icon="trash"
+                                    label={__('Remove image', 'text-domain')}
+                                />
                             </figure>
                         </div>
                     ))}
@@ -189,7 +189,7 @@ registerBlockType('techplay-gutenberg-blocks/ai-image-gallery', {
                                 onClick={open}
                                 style={{ marginTop: '20px' }}
                             >
-                                이미지 추가
+                                {images.length > 0 ? __('이미지 추가/편집', 'text-domain') : __('갤러리에 이미지 추가', 'text-domain')}
                             </Button>
                         )}
                     />

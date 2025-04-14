@@ -1,9 +1,11 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const DependencyExtractionWebpackPlugin = require('@wordpress/dependency-extraction-webpack-plugin');
 
 module.exports = {
     mode: 'development',
     devtool: 'source-map',
+    cache: false,
     entry: {
         index: './src/index.js',
         'download-button': './src/blocks/download-button/frontend.js',
@@ -20,12 +22,6 @@ module.exports = {
     output: {
         path: path.resolve(__dirname, 'build'),
         filename: '[name].js'
-    },
-    optimization: {
-        splitChunks: {
-            chunks: 'all'
-        },
-        minimize: false
     },
     resolve: {
         extensions: ['.js', '.jsx', '.json', '.css', '.scss'],
@@ -66,7 +62,8 @@ module.exports = {
     plugins: [
         new MiniCssExtractPlugin({
             filename: '[name].css'
-        })
+        }),
+        new DependencyExtractionWebpackPlugin()
     ],
     externals: {
         jquery: 'jQuery',

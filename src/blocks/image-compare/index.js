@@ -22,6 +22,14 @@ registerBlockType('techplay-blocks/image-compare', {
     edit: ({ attributes, setAttributes }) => {
         const { image1, image2 } = attributes;
 
+        // Helper function to ensure HTTPS
+        const ensureHttps = (url) => {
+            if (url && url.startsWith('http://')) {
+                return url.replace('http://', 'https://');
+            }
+            return url;
+        };
+
         return (
             <>
                 <InspectorControls>
@@ -65,9 +73,9 @@ registerBlockType('techplay-blocks/image-compare', {
                 <div className="wp-block-techplay-image-compare">
                     {image1 && image2 ? (
                         <div className="image-compare-container">
-                            <img src={image1.url} alt={image1.alt || ''} />
+                            <img src={ensureHttps(image1.url)} alt={image1.alt || ''} />
                             <div className="image-compare-separator"></div>
-                            <img src={image2.url} alt={image2.alt || ''} />
+                            <img src={ensureHttps(image2.url)} alt={image2.alt || ''} />
                         </div>
                     ) : (
                         <p>이미지를 선택해주세요.</p>
@@ -84,12 +92,20 @@ registerBlockType('techplay-blocks/image-compare', {
             return null;
         }
 
+        // Helper function to ensure HTTPS (can be defined outside or passed)
+        const ensureHttps = (url) => {
+            if (url && url.startsWith('http://')) {
+                return url.replace('http://', 'https://');
+            }
+            return url;
+        };
+
         return (
             <div className="wp-block-techplay-image-compare">
                 <div className="image-compare-container">
-                    <img src={image1.url} alt={image1.alt || ''} />
+                    <img src={ensureHttps(image1.url)} alt={image1.alt || ''} className="image-compare-before"/>
+                    <img src={ensureHttps(image2.url)} alt={image2.alt || ''} className="image-compare-after"/>
                     <div className="image-compare-separator"></div>
-                    <img src={image2.url} alt={image2.alt || ''} />
                 </div>
             </div>
         );

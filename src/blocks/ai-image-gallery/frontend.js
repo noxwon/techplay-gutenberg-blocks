@@ -83,43 +83,6 @@ jQuery(document).ready(function($) {
                 });
             }
         });
-
-        // Masonry 레이아웃 최적화
-        const optimizeMasonryLayout = () => {
-            $('.wp-block-techplay-blocks-ai-image-gallery .is-masonry').each(function() {
-                const $gallery = $(this);
-                const $images = $gallery.find('img');
-                
-                // 이미지가 모두 로드된 후 레이아웃 조정
-                let loadedImages = 0;
-                $images.each(function() {
-                    if (this.complete) {
-                        loadedImages++;
-                    } else {
-                        $(this).one('load', function() {
-                            loadedImages++;
-                            if (loadedImages === $images.length) {
-                                $gallery.addClass('images-loaded');
-                            }
-                        });
-                    }
-                });
-
-                if (loadedImages === $images.length) {
-                    $gallery.addClass('images-loaded');
-                }
-            });
-        };
-
-        // 초기 Masonry 레이아웃 최적화
-        optimizeMasonryLayout();
-
-        // 창 크기 변경 시 레이아웃 재조정
-        let resizeTimer;
-        $(window).on('resize', function() {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(optimizeMasonryLayout, 250);
-        });
     };
 
     // 초기화

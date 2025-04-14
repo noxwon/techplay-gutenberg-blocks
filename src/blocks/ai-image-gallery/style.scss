@@ -1,113 +1,83 @@
+// AI Image Gallery Block Styles (Includes Modal and Hover Button Styles)
+
 .wp-block-techplay-gutenberg-blocks-ai-image-gallery {
-    display: grid;
-    gap: 16px; /* Default gap */
-    margin: 0;
-    padding: 0;
     list-style: none;
-    position: relative;
+    padding: 0;
+    margin: 0;
+    // Ensure relative positioning if items inside need absolute positioning relative to this container
+    position: relative; 
+}
 
-    /* Column classes */
-    &.columns-1 { grid-template-columns: repeat(1, 1fr); }
-    &.columns-2 { grid-template-columns: repeat(2, 1fr); }
-    &.columns-3 { grid-template-columns: repeat(3, 1fr); }
-    &.columns-4 { grid-template-columns: repeat(4, 1fr); }
-    &.columns-5 { grid-template-columns: repeat(5, 1fr); }
-    &.columns-6 { grid-template-columns: repeat(6, 1fr); }
-    &.columns-7 { grid-template-columns: repeat(7, 1fr); }
-    &.columns-8 { grid-template-columns: repeat(8, 1fr); }
-
-    /* Gap classes */
-    &.gap-0 { gap: 0; }
-    &.gap-4 { gap: 4px; }
-    &.gap-8 { gap: 8px; }
-    &.gap-12 { gap: 12px; }
-    &.gap-16 { gap: 16px; }
-    &.gap-20 { gap: 20px; }
-    &.gap-24 { gap: 24px; }
-    &.gap-32 { gap: 32px; }
-    &.gap-40 { gap: 40px; }
-    &.gap-48 { gap: 48px; }
+/* 1. Styles for when Masonry is ENABLED */
+.wp-block-techplay-gutenberg-blocks-ai-image-gallery.has-masonry-layout {
+    display: block !important; 
+    position: relative; 
 
     .gallery-item {
-        position: relative;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        background: #f0f0f0;
-        border-radius: 4px;
-        transition: transform 0.3s ease;
-
-        &:hover {
-            transform: scale(1.02);
-            .image-hover-actions {
-                opacity: 1;
-                visibility: visible;
-            }
-            .image-info-icon {
-                opacity: 1;
-                visibility: visible;
-            }
-        }
+        box-sizing: border-box;
+        margin-bottom: var(--gap, 16px); 
+        position: relative; // Needed for absolute positioned children like buttons
+        overflow: hidden; // Keep hidden to prevent layout shifts from initially invisible absolutely positioned elements
+        background: #f0f0f0; // Background for loading state
+        border-radius: 4px; // Rounded corners
 
         figure {
             margin: 0;
             padding: 0;
-            height: 100%; /* Ensure figure takes full height */
-            display: block; /* Fix potential extra space below figure */
+            display: block;
+            line-height: 0;
         }
 
         img {
-            width: 100%;
-            height: 100%; /* Default height for non-masonry */
-            object-fit: cover; /* Default fit */
-            display: block;
+            display: block; 
+            width: 100%; 
+            height: auto !important; 
+            object-fit: cover; 
             transition: transform 0.3s ease;
         }
+        
+        &:hover img {
+            transform: scale(1.05); // Slight zoom on hover
+        }
 
-        .image-info-icon {
+        // --- Icons & Hover Actions --- 
+        .image-info-icon, .image-hover-actions {
             position: absolute;
-            bottom: 8px;
-            left: 8px;
+            bottom: 5px;
+            opacity: 0; 
+            visibility: hidden; 
+            transition: opacity 0.3s ease, visibility 0s linear 0.3s; 
+            z-index: 9;
+        }
+        
+        .image-info-icon {
+            left: 5px; 
+            z-index: 10;
             background-color: rgba(30, 30, 30, 0.7);
             color: white;
             border: none;
             border-radius: 50%;
             width: 34px;
             height: 34px;
+            padding: 0;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            padding: 0;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease, background-color 0.2s ease, transform 0.2s ease;
-            z-index: 10;
-
-            svg {
-                display: block;
-                width: 20px;
-                height: 20px;
-            }
-
-            &:hover {
-                background-color: rgba(0, 120, 255, 0.9);
-                transform: scale(1.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            transition: opacity 0.3s ease, visibility 0s linear 0.3s, background-color 0.2s ease, transform 0.2s ease;
+            svg { width: 20px; height: 20px; fill: currentColor; }
+            &:hover { 
+                background-color: rgba(0, 120, 255, 0.9); 
+                transform: scale(1.1); 
             }
         }
-
-        .image-hover-actions {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            display: flex;
-            gap: 6px;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            z-index: 9;
-
-            button {
+        
+        .image-hover-actions { 
+            right: 5px; 
+            display: flex; 
+            gap: 6px; 
+            button { 
                 background-color: rgba(30, 30, 30, 0.7);
                 color: white;
                 border: none;
@@ -119,337 +89,368 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                transition: background-color 0.2s ease, transform 0.2s ease;
                 box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-
-                svg {
-                    display: block;
-                    width: 18px;
-                    height: 18px;
-                    fill: currentColor;
-                }
-
-                &:hover {
-                    background-color: rgba(0, 0, 0, 0.9);
-                    transform: scale(1.1);
-                }
-                
-                &:focus {
-                    outline: none;
-                    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
-                }
-            }
-
-            .copy-url-button:hover {
-                background-color: rgba(0, 120, 255, 0.9);
-            }
-            .download-image-button:hover {
-                background-color: rgba(0, 180, 80, 0.9);
+                transition: background-color 0.2s ease, transform 0.2s ease; 
+                svg { display: block; width: 18px; height: 18px; fill: currentColor; }
+                &:hover { transform: scale(1.1); }
+                &:focus { outline: none; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5); }
+             }
+             .copy-url-button:hover { background-color: rgba(0, 120, 255, 0.9); }
+             .download-image-button:hover { background-color: rgba(0, 180, 80, 0.9); }
+             .copy-url-button.copied::after {
+                content: "Copied!";
+                position: absolute;
+                bottom: 110%;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                white-space: nowrap;
             }
         }
-    }
-
-    /* Image Height Classes (applied when not masonry) */
-    &:not(.has-masonry) {
-        &.image-height-100 .gallery-item img { height: 100px; }
-        &.image-height-200 .gallery-item img { height: 200px; }
-        &.image-height-300 .gallery-item img { height: 300px; }
-        &.image-height-400 .gallery-item img { height: 400px; }
-        &.image-height-500 .gallery-item img { height: 500px; }
-        &.image-height-600 .gallery-item img { height: 600px; }
-        /* Add more steps if needed */
-
-        /* Image Fit Classes (applied when not masonry) */
-        &.image-fit-cover .gallery-item img { object-fit: cover; }
-        &.image-fit-contain .gallery-item img { object-fit: contain; }
-    }
-
-    /* Masonry specific styles */
-    &.has-masonry {
-        display: grid; /* Keep grid for consistent gap */
-        
-        .gallery-item {
-            break-inside: avoid; /* For potential future column-count usage */
-            margin-bottom: 0; /* Grid handles gap */
-            
-            img {
-                height: auto; /* Crucial for masonry */
-                object-fit: cover; /* Default for masonry, aspect-ratio handles proportions */
-            }
-        }
-    }
-}
-
-// 반응형 스타일
-@media (max-width: 1200px) {
-    .wp-block-techplay-gutenberg-blocks-ai-image-gallery {
-        // Responsive columns might be better handled by adjusting grid-template-columns directly
-        &.columns-4, &.columns-5, &.columns-6, &.columns-7, &.columns-8 {
-            grid-template-columns: repeat(3, 1fr);
-        }
-    }
-}
-
-@media (max-width: 768px) {
-    .wp-block-techplay-gutenberg-blocks-ai-image-gallery {
-        &.columns-3, &.columns-4, &.columns-5, &.columns-6, &.columns-7, &.columns-8 {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-}
-
-@media (max-width: 480px) {
-    .wp-block-techplay-gutenberg-blocks-ai-image-gallery {
-        &.columns-2, &.columns-3, &.columns-4, &.columns-5, &.columns-6, &.columns-7, &.columns-8 {
-            grid-template-columns: repeat(1, 1fr);
-        }
-    }
-}
-
-// Info Modal Styles - Ensure initial hide and high z-index when visible
-#ai-gallery-info-modal {
-    display: none; // Ensure initially hidden
-    position: fixed !important; 
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    background-color: rgba(0, 0, 0, 0.75) !important; // Semi-transparent background
-    padding: 40px !important; // More padding for viewport edges
-    box-sizing: border-box !important;
-    z-index: 100000 !important; // Extremely high z-index
-    overflow-y: auto !important; // Allow scrolling if content overflows viewport height
-    // Ensure flex properties for centering are applied here if needed, 
-    // but JS is already setting display: flex
-    align-items: center; // Keep for vertical centering if JS uses display:flex
-    justify-content: center; // Keep for horizontal centering if JS uses display:flex
-
-    .modal-content {
-        background: #fff;
-        padding: 25px 30px;
-        border-radius: 5px;
-        max-width: 800px;
-        width: 90%; 
-        max-height: none; // Remove max-height constraint on content box itself
-        margin: auto; // Center the content box within the modal overlay
-        position: relative; 
-        // overflow-y: auto; // Removed, apply to the modal itself
-    }
-
-    .close-button {
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        font-size: 28px;
-        line-height: 1;
-        font-weight: bold;
-        color: #aaa;
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 5px;
+         
         &:hover {
-            color: #333;
-        }
-    }
-    
-    .image-meta {
-        padding: 30px;
-        max-width: 800px;
-        margin: 0 auto;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-
-        h3 {
-            margin: 0 0 20px;
-            font-size: 24px;
-            color: #1a1a1a;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 10px;
-        }
-
-        .meta-section {
-            margin-bottom: 25px;
-
-            &:last-child {
-                margin-bottom: 0;
-            }
-
-            h4 {
-                margin: 0 0 15px;
-                font-size: 18px;
-                color: #2271b1;
-            }
-
-            .prompt-box {
-                background: #f8f9fa;
-                padding: 15px;
-                border-radius: 8px;
-                margin-bottom: 15px;
-
-                &.positive {
-                    border-left: 4px solid #00a32a;
-                }
-
-                &.negative {
-                    border-left: 4px solid #d63638;
-                }
-
-                strong {
-                    display: block;
-                    margin-bottom: 8px;
-                    color: #1a1a1a;
-                }
-
-                p {
-                    margin: 0;
-                    font-size: 14px;
-                    line-height: 1.6;
-                    color: #1a1a1a;
-                    white-space: pre-wrap;
-                    word-break: break-word;
-                }
-            }
-
-            p {
-                margin: 0 0 10px;
-                font-size: 14px;
-                color: #1a1a1a;
-                display: flex;
-                align-items: baseline;
-
-                &:last-child {
-                    margin-bottom: 0;
-                }
-
-                strong {
-                    color: #1a1a1a;
-                    margin-right: 8px;
-                    font-weight: 600;
-                    min-width: 180px;
-                }
+            .image-hover-actions, .image-info-icon {
+                opacity: 1;
+                visibility: visible;
+                transition-delay: 0s;
             }
         }
     }
+    // Restore width definitions using calc() to work with gutter
+     &.columns-1 .gallery-item { width: 100%; }
+     &.columns-2 .gallery-item { width: calc(50% - (var(--gap, 16px) / 2)); }
+     &.columns-3 .gallery-item { width: calc(33.3333% - (var(--gap, 16px) * 2 / 3)); }
+     &.columns-4 .gallery-item { width: calc(25% - (var(--gap, 16px) * 3 / 4)); }
+     &.columns-5 .gallery-item { width: calc(20% - (var(--gap, 16px) * 4 / 5)); }
+     &.columns-6 .gallery-item { width: calc(16.6666% - (var(--gap, 16px) * 5 / 6)); }
+     &.columns-7 .gallery-item { width: calc(14.2857% - (var(--gap, 16px) * 6 / 7)); }
+     &.columns-8 .gallery-item { width: calc(12.5% - (var(--gap, 16px) * 7 / 8)); }
+     
+    // Restore responsive width definitions using calc()
+    @media (max-width: 1200px) {
+         &.has-masonry-layout {
+            &.columns-4 .gallery-item, &.columns-5 .gallery-item, &.columns-6 .gallery-item, &.columns-7 .gallery-item, &.columns-8 .gallery-item {
+                 width: calc(33.3333% - (var(--gap, 16px) * 2 / 3));
+            }
+         }
+    }
+    @media (max-width: 768px) {
+         &.has-masonry-layout {
+             &.columns-3 .gallery-item, &.columns-4 .gallery-item, &.columns-5 .gallery-item, &.columns-6 .gallery-item, &.columns-7 .gallery-item, &.columns-8 .gallery-item {
+                  width: calc(50% - (var(--gap, 16px) / 2));
+             }
+         }
+     }
+      @media (max-width: 480px) {
+         &.has-masonry-layout {
+             &.columns-2 .gallery-item, &.columns-3 .gallery-item, &.columns-4 .gallery-item, &.columns-5 .gallery-item, &.columns-6 .gallery-item, &.columns-7 .gallery-item, &.columns-8 .gallery-item {
+                  width: 100%; 
+             }
+         }
+     }
 }
 
-.wp-block-techplay-blocks-ai-image-gallery {
-    &.alignfull {
-        padding: 0 var(--gap);
-    }
 
-    &.alignwide {
-        max-width: var(--wp--style--global--wide-size);
-        margin-left: auto;
-        margin-right: auto;
-    }
-}
+/* 2. Styles for when Masonry is DISABLED (Using CSS Grid) */
+.wp-block-techplay-gutenberg-blocks-ai-image-gallery:not(.has-masonry-layout) {
+    display: grid;
+    gap: var(--gap, 16px);
 
-// Lightbox Modal Styles - Restore transitions
-#ai-gallery-lightbox-modal {
-    position: fixed !important; 
-    z-index: 99990 !important; 
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    background-color: rgba(0, 0, 0, 0.85) !important;
-    display: flex; // Always flex for centering context
-    align-items: center !important; 
-    justify-content: center !important; 
-    padding: 20px !important; 
-    box-sizing: border-box !important;
-    
-    // Initial hidden state & transition
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0s linear 0.3s; // Restore transition
+    &.columns-1 { grid-template-columns: repeat(1, 1fr); }
+    &.columns-2 { grid-template-columns: repeat(2, 1fr); }
+    &.columns-3 { grid-template-columns: repeat(3, 1fr); }
+    &.columns-4 { grid-template-columns: repeat(4, 1fr); }
+    &.columns-5 { grid-template-columns: repeat(5, 1fr); }
+    &.columns-6 { grid-template-columns: repeat(6, 1fr); }
+    &.columns-7 { grid-template-columns: repeat(7, 1fr); }
+    &.columns-8 { grid-template-columns: repeat(8, 1fr); }
 
-    // Visible state (controlled by adding/removing .visible class)
-    &.visible {
-        opacity: 1;
-        visibility: visible;
-        transition: opacity 0.3s ease, visibility 0s linear 0s; // Restore transition
-    }
-
-    .modal-content {
-        position: relative; 
-        width: auto; 
-        height: auto; 
-        max-width: calc(100% - 40px); 
-        max-height: calc(100% - 40px); 
-        background: none; 
-        padding: 0;
-        margin: auto; // Center the content box within the flex container
-        
-        // Restore scale transition
-        transform: scale(0.95);
-        transition: transform 0.3s ease;
-        
-        #ai-gallery-lightbox-modal.visible & { // Apply scale up when modal is visible
-             transform: scale(1);
-        }
-        
-        // Close button INSIDE modal-content (Button style)
-        .close-button { 
-            position: absolute;
-            top: 10px; // Inside top edge
-            right: 10px; // Inside right edge
-            width: 36px; // Make button slightly larger for easier click
-            height: 36px; 
-            background-color: rgba(30, 30, 30, 0.7); // Slightly more transparent
-            color: white;
-            border: none; // Remove default button border
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0; // Remove default button padding
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            z-index: 100; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2); // Add subtle shadow
-
-            svg {
-                display: block; // Ensure svg is treated as block
-                width: 20px; // Control icon size
-                height: 20px;
-            }
-
-            &:hover {
-                background-color: rgba(220, 50, 50, 0.9); 
-                transform: scale(1.1); // Slight zoom effect on hover
-            }
-            
-            &:focus {
-                outline: 2px solid rgba(255, 255, 255, 0.7); // Focus indicator
-                outline-offset: 2px;
-            }
-        }
+    .gallery-item {
+        position: relative;
+        margin: 0;
+        overflow: hidden;
+        background: #f0f0f0; 
+        border-radius: 4px; 
 
         figure {
             margin: 0;
             padding: 0;
-            line-height: 0; 
-            width: auto; 
-            height: auto; 
-            max-width: 100%; 
-            max-height: 100%; 
-            display: block; 
+            display: block;
+            line-height: 0;
+        }
 
-            img {
-                display: block;
-                width: auto; 
-                height: auto; 
-                max-width: 100%; 
-                max-height: 100%; 
-                object-fit: contain; 
+        img {
+            width: 100%;
+            height: 100%; 
+            display: block;
+        }
+        .image-info-icon, .image-hover-actions {
+            position: absolute;
+            bottom: 5px;
+            opacity: 0; 
+            visibility: hidden; 
+            transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+            z-index: 9;
+        }
+        .image-info-icon { left: 5px; z-index: 10; /* Assuming icon styles exist */ }
+        .image-hover-actions { right: 5px; display: flex; gap: 6px; /* Assuming button styles exist */ }
+        &:hover {
+            .image-hover-actions, .image-info-icon {
+                opacity: 1;
+                visibility: visible;
+                transition-delay: 0s;
+                transition: opacity 0.3s ease, visibility 0s linear 0s; 
             }
         }
     }
+    // Apply image-height and image-fit directly to block for grid mode
+     &.image-height-100 .gallery-item img { height: 100px; }
+     &.image-height-200 .gallery-item img { height: 200px; }
+     &.image-height-300 .gallery-item img { height: 300px; }
+     &.image-height-400 .gallery-item img { height: 400px; }
+     &.image-height-500 .gallery-item img { height: 500px; }
+     &.image-height-600 .gallery-item img { height: 600px; }
+     
+     &.image-fit-cover .gallery-item img { object-fit: cover; }
+     &.image-fit-contain .gallery-item img { object-fit: contain; }
 }
 
-// Final explicit hide rule for safety (though included above now)
-// #ai-gallery-lightbox-modal, 
-// #ai-gallery-info-modal {
-//     display: none !important; 
-// } 
+/* Responsive Styles */
+@media (max-width: 1200px) {
+    .wp-block-techplay-gutenberg-blocks-ai-image-gallery {
+        &:not(.has-masonry-layout) {
+             &.columns-4, &.columns-5, &.columns-6, &.columns-7, &.columns-8 {
+                 grid-template-columns: repeat(3, 1fr);
+             }
+        }
+         &.has-masonry-layout {
+            &.columns-4 .gallery-item, &.columns-5 .gallery-item, &.columns-6 .gallery-item, &.columns-7 .gallery-item, &.columns-8 .gallery-item {
+                 width: 33.3333%;
+            }
+         }
+    }
+}
+
+@media (max-width: 768px) {
+     .wp-block-techplay-gutenberg-blocks-ai-image-gallery {
+         &:not(.has-masonry-layout) {
+             &.columns-3, &.columns-4, &.columns-5, &.columns-6, &.columns-7, &.columns-8 {
+                 grid-template-columns: repeat(2, 1fr);
+             }
+         }
+         &.has-masonry-layout {
+             &.columns-3 .gallery-item, &.columns-4 .gallery-item, &.columns-5 .gallery-item, &.columns-6 .gallery-item, &.columns-7 .gallery-item, &.columns-8 .gallery-item {
+                  width: 50%;
+             }
+         }
+     }
+}
+
+@media (max-width: 480px) {
+     .wp-block-techplay-gutenberg-blocks-ai-image-gallery {
+         &:not(.has-masonry-layout) {
+             &.columns-2, &.columns-3, &.columns-4, &.columns-5, &.columns-6, &.columns-7, &.columns-8 {
+                 grid-template-columns: repeat(1, 1fr);
+             }
+         }
+          &.has-masonry-layout {
+             &.columns-2 .gallery-item, &.columns-3 .gallery-item, &.columns-4 .gallery-item, &.columns-5 .gallery-item, &.columns-6 .gallery-item, &.columns-7 .gallery-item, &.columns-8 .gallery-item {
+                  width: 100%;
+             }
+         }
+     }
+}
+
+/* Modal Styles */
+#ai-gallery-info-modal, 
+#ai-gallery-lightbox-modal {
+    display: none; // Start hidden 
+    position: fixed !important; 
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    box-sizing: border-box !important;
+    z-index: 999990 !important; 
+    background-color: rgba(0, 0, 0, 0.85) !important; 
+    padding: 20px !important; 
+    overflow-y: auto; 
+    align-items: center; 
+    justify-content: center; 
+}
+
+#ai-gallery-info-modal { 
+    z-index: 1000000 !important; 
+    background-color: rgba(0, 0, 0, 0.75) !important; 
+    // Keep display:none for info modal as it uses jQuery fade
+}
+
+.modal-content { // Common styles for both modals' content area
+    position: relative; 
+    background: #fff;
+    border-radius: 5px;
+    padding: 0; // Reset padding, apply specifically below
+    margin: auto; 
+    // max-width: 90%; // Limit max width
+    // max-height: 90%; // Limit max height
+    width: auto; 
+    height: auto;
+    // Transition for lightbox scale effect
+    // transform: scale(0.95);
+    transition: transform 0.3s ease;
+}
+
+#ai-gallery-info-modal .modal-content { // Specific padding for info modal
+    padding: 25px 30px;
+    max-width: 800px; // Specific max-width for info modal
+    max-height: calc(100vh - 80px); // Ensure it doesn't exceed viewport height with padding
+    overflow-y: auto;
+}
+#ai-gallery-lightbox-modal .modal-content { // Specific styles for lightbox
+    background: none; // Lightbox content is just the image
+    padding: 0;
+}
+
+.close-button { // Common close button style
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px; 
+    background-color: rgba(30, 30, 30, 0.7); 
+    color: white;
+    border: none; 
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    z-index: 1000001 !important; // Ensure close button is definitely above modal content and overlay
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+
+    svg {
+        display: block; 
+        width: 20px; 
+        height: 20px;
+    }
+    &:hover {
+        background-color: rgba(220, 50, 50, 0.9); 
+        transform: scale(1.1); 
+    }
+    &:focus {
+        outline: 2px solid rgba(255, 255, 255, 0.7); 
+        outline-offset: 2px;
+    }
+}
+
+#ai-gallery-info-modal .close-button { // Specific style if needed
+     font-size: 28px; // Use X character size
+     line-height: 1;
+     font-weight: bold;
+     color: #aaa;
+     background: none;
+     &:hover { color: #333; background: none; transform: none; }
+}
+
+// Styles for info modal content area
+.image-meta {
+    padding: 30px;
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+
+    h3 {
+        margin: 0 0 20px;
+        font-size: 24px;
+        color: #1a1a1a;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 10px;
+    }
+
+    .meta-section {
+        margin-bottom: 25px;
+        &:last-child { margin-bottom: 0; }
+        h4 {
+            margin: 0 0 15px;
+            font-size: 18px;
+            color: #2271b1;
+        }
+        .prompt-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #1a1a1a;
+            white-space: pre-wrap;
+            word-break: break-word;
+            &.positive { border-left: 4px solid #00a32a; }
+            &.negative { border-left: 4px solid #d63638; }
+            strong {
+                display: block;
+                margin-bottom: 8px;
+                color: #1a1a1a;
+                font-weight: 600;
+            }
+            p { margin: 0; }
+        }
+        
+        p {
+            margin: 0 0 10px;
+            font-size: 14px;
+            color: #1a1a1a;
+            display: flex;
+            align-items: baseline;
+            line-height: 1.6;
+            &:last-child { margin-bottom: 0; }
+            
+            strong {
+                color: #1a1a1a;
+                margin-right: 8px;
+                font-weight: 600;
+                min-width: 150px;
+                display: inline-block;
+                flex-shrink: 0;
+            }
+            span {
+                word-break: break-all;
+            }
+            pre { /* ... */ }
+        }
+        
+        &.generation-details-section p {
+            display: flex;
+            align-items: baseline;
+             strong { min-width: 150px; }
+        }
+        
+        &.civitai-resources-section p strong { /* ... */ }
+    }
+}
+
+// Styles for lightbox figure/image
+#ai-gallery-lightbox-modal figure {
+    margin: 0;
+    padding: 0;
+    line-height: 0; 
+    width: auto; 
+    height: auto; 
+    max-width: 100%; 
+    max-height: 100%; 
+    display: block; 
+    img {
+        display: block;
+        width: auto; 
+        height: auto; 
+        max-width: 100%; 
+        max-height: 100%; 
+        object-fit: contain; 
+    }
+}

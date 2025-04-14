@@ -2,11 +2,12 @@
     "$schema": "https://schemas.wp.org/trunk/block.json",
     "apiVersion": 3,
     "name": "techplay-gutenberg-blocks/ai-image-gallery",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "title": "AI 이미지 갤러리",
     "category": "media",
     "icon": "format-gallery",
-    "description": "AI로 생성된 이미지를 표시하는 갤러리 블록입니다.",
+    "description": "AI로 생성된 이미지를 표시하고 관리하는 갤러리 블록입니다.",
+    "keywords": ["image", "gallery", "ai", "masonry", "lightbox"],
     "supports": {
         "html": false,
         "align": ["wide", "full"]
@@ -14,36 +15,28 @@
     "attributes": {
         "images": {
             "type": "array",
-            "default": []
+            "default": [],
+            "source": "query",
+            "selector": ".gallery-item",
+            "query": {
+                "url": { "source": "attribute", "selector": "img", "attribute": "src" },
+                "id": { "source": "attribute", "attribute": "data-id" },
+                "alt": { "source": "attribute", "selector": "img", "attribute": "alt" },
+                "prompt": { "source": "attribute", "selector": "img", "attribute": "data-prompt" },
+                "parameters": { "source": "attribute", "selector": "img", "attribute": "data-parameters" }
+            }
         },
-        "columns": {
-            "type": "number",
-            "default": 3
-        },
-        "gap": {
-            "type": "number",
-            "default": 16
-        },
-        "imageHeight": {
-            "type": "number",
-            "default": 300
-        },
-        "useMasonry": {
-            "type": "boolean",
-            "default": false
-        },
-        "showImageInfo": {
-            "type": "boolean",
-            "default": true
-        },
-        "lightboxEnabled": {
-            "type": "boolean",
-            "default": true
-        }
+        "columns": { "type": "number", "default": 3 },
+        "gap": { "type": "number", "default": 16 },
+        "lightboxEnabled": { "type": "boolean", "default": true },
+        "masonryEnabled": { "type": "boolean", "default": true },
+        "imageFit": { "type": "string", "default": "cover" },
+        "imageHeight": { "type": "number", "default": 300 },
+        "showImageInfo": { "type": "boolean", "default": true }
     },
     "textdomain": "techplay-gutenberg-blocks",
-    "editorScript": "file:./index.js",
-    "editorStyle": "file:./index.css",
-    "style": "file:./style-index.css",
+    "editorScript": "file:../../../build/index.js",
+    "editorStyle": "file:../../../build/index.css",
+    "style": "techplay-blocks-common-style",
     "render": "file:./render.php"
 } 
